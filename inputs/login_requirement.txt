@@ -1,0 +1,1 @@
+The system shall allow registered users to log in through a dedicated login screen. The login screen must contain a 'username' field, a 'password' field, and a 'Login' button. For security compliance with HIPAA, the password field must mask the characters as they are typed.
