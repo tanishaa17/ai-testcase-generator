@@ -1,6 +1,9 @@
 import os
+import re
 import google.generativeai as genai
 from dotenv import load_dotenv
+import argparse
+from jira import JIRA
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -11,6 +14,26 @@ def configure_ai():
     if not api_key or api_key == 'YOUR_API_KEY_HERE':
         raise ValueError("GEMINI_API_KEY not found or is a placeholder. Check your .env file.")
     genai.configure(api_key=api_key)
+
+def configure_jira():
+    """Connects to Jira using credentials from environment variables."""
+    server = os.environ.get("JIRA_SERVER")
+    user = os.environ.get("JIRA_USER")
+    api_token = os.environ.get("JIRA_API_TOKEN")
+
+    if not all([server, user, api_token]) or "your-domain" in server or "your-email" in user or "your_api_token" in api_token:
+        raise ValueError("Jira credentials are not fully configured in .env file. Please check JIRA_SERVER, JIRA_USER, and JIRA_API_TOKEN.")
+
+    print(f"Connecting to Jira server at: {server}")
+    try:
+        jira_client = JIRA(server=server, basic_auth=(user, api_token))
+        # Verify connection by getting server info
+        jira_client.server_info()
+        print("Jira connection successful.")
+        return jira_client
+    except Exception as e:
+        raise Exception(f"Jira connection failed: {e}")
+
 
 def read_requirement_file(file_path):
     """Reads the content of the requirement file."""
@@ -27,7 +50,8 @@ def generate_test_cases(requirement_text):
     prompt = (
         "You are an expert QA Engineer specializing in healthcare software compliance and testing.\n"
         "Your task is to analyze the provided software requirement and generate a comprehensive set of test cases.\n\n"
-        "The output must be in Gherkin format.\n"
+        "The output must be in Gherkin format, starting with a 'Feature' definition.\n"
+        "Each scenario must start with the keyword 'Scenario:' or 'Scenario Outline:'.\n"
         "The test cases should cover:\n"
         "1.  Positive scenarios (happy paths).\n"
         "2.  Negative scenarios (error conditions, invalid inputs).\n"
@@ -57,21 +81,67 @@ def save_output_to_file(content, file_path):
     except Exception as e:
         raise Exception(f"An error occurred while saving the file: {e}")
 
-# --- Main Execution ---
-if __name__ == "__main__":
+def create_jira_issues(jira_client, gherkin_text):
+    """Parses Gherkin text and creates a Jira issue for each scenario."""
+    project_key = os.environ.get("JIRA_PROJECT_KEY")
+    if not project_key or "PROJ" in project_key:
+        raise ValueError("JIRA_PROJECT_KEY is not configured in .env file.")
+
+    print(f"\n--- Creating Jira Issues in Project: {project_key} ---")
+    
+    # Split the feature file into individual scenarios
+    scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
+    if len(scenarios) < 2:
+        print("No scenarios found in the generated text. Skipping Jira creation.")
+        return
+
+    feature_header = scenarios[0] # The part before the first scenario
+    
+    for scenario_text in scenarios[1:]:
+        # The first line of the scenario is the title
+        try:
+            title = scenario_text.splitlines()[0].strip()
+            
+            issue_dict = {
+                'project': {'key': project_key},
+                'summary': title,
+                'description': f"{{code:gherkin}}\n{feature_header}\n{scenario_text}{{code}}",
+                'issuetype': {'name': 'Task'},
+            }
+            
+            new_issue = jira_client.create_issue(fields=issue_dict)
+            print(f"Successfully created Jira issue: {new_issue.key} - '{title}'")
+
+        except Exception as e:
+            print(f"Failed to create Jira issue for scenario: '{title}'. Error: {e}")
+
+def main():
+    """Wraps the main execution logic."""
+    parser = argparse.ArgumentParser(description="Generate AI-powered test cases from requirement files.")
+    parser.add_argument("-i", "--input", required=True, help="Path to the input requirement file.")
+    parser.add_argument("-o", "--output", required=True, help="Path for the generated output Gherkin file.")
+    parser.add_argument("--jira", action='store_true', help="If set, create issues in Jira for each test scenario.")
+    args = parser.parse_args()
+
     try:
         configure_ai()
-        print("Configuration successful.")
+        print("AI configuration successful.")
         
-        input_file_path = 'inputs/login_requirement.txt'
-        requirement_text = read_requirement_file(input_file_path)
+        print(f"Reading requirement from: {args.input}")
+        requirement_text = read_requirement_file(args.input)
         
         print("\n--- Generating Test Cases ---")
         generated_tests = generate_test_cases(requirement_text)
         
-        # Define the output file path and save the content
-        output_file_path = 'outputs/generated_tests.feature'
-        save_output_to_file(generated_tests, output_file_path)
+        save_output_to_file(generated_tests, args.output)
+
+        if args.jira:
+            jira_client = configure_jira()
+            create_jira_issues(jira_client, generated_tests)
 
     except Exception as e:
-        print(f"An error occurred during execution: {e}")
+        print(f"\nAn error occurred during execution: {e}")
+
+
+if __name__ == "__main__":
+    main()
