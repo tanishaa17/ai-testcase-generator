@@ -4,9 +4,11 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import argparse
 from jira import JIRA
+import docx
+from pypdf import PdfReader
 
 # Load environment variables from the .env file
-load_dotenv()
+load_dotenv(encoding="utf-8")
 
 def configure_ai():
     """Configures the Gemini AI with the API key."""
@@ -36,14 +38,30 @@ def configure_jira():
 
 
 def read_requirement_file(file_path):
-    """Reads the content of the requirement file."""
+    """Reads the content of the requirement file, supporting .txt, .pdf, and .docx."""
     try:
-        with open(file_path, 'r') as f:
-            return f.read()
+        if file_path.lower().endswith('.pdf'):
+            reader = PdfReader(file_path)
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text() or ""
+            return text
+        elif file_path.lower().endswith('.docx'):
+            doc = docx.Document(file_path)
+            text = ""
+            for para in doc.paragraphs:
+                text += para.text + '\n'
+            return text
+        elif file_path.lower().endswith('.txt'):
+            with open(file_path, 'r') as f:
+                return f.read()
+        else:
+            raise ValueError(f"Unsupported file type: {file_path}. Only .txt, .pdf, and .docx are supported.")
     except FileNotFoundError:
         raise FileNotFoundError(f"Error: Requirement file not found at {file_path}")
     except Exception as e:
         raise Exception(f"An error occurred while reading the file: {e}")
+
 
 def generate_test_cases(requirement_text):
     """Generates test cases using the Gemini AI."""
