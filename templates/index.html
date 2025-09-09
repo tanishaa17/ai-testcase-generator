@@ -4,47 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Test Case Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Highlight.js CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 40px; background-color: #f7f7f7; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #1a73e8; }
-        form { margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-        input[type="file"] { border: 1px solid #ccc; padding: 10px; border-radius: 4px; width: 70%; }
-        input[type="submit"] { background-color: #1a73e8; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        input[type="submit"]:hover { background-color: #1558b8; }
-        .results { margin-top: 20px; }
-        h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        pre { background-color: #2d2d2d; color: #f4f4f4; padding: 20px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; font-family: "Courier New", Courier, monospace; }
-        .flash-messages { list-style: none; padding: 0; margin-bottom: 20px; }
-        .flash-messages li { padding: 15px; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 10px; }
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .header {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .card {
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            font-weight: 500;
+        }
+        pre {
+            margin: 0;
+        }
+        .compliance-tag {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI Test Case Generator</h1>
-        <p>Upload a requirement file (.txt, .docx, .pdf, .xml) to automatically generate Gherkin test cases.</p>
+    <div class="container my-5">
+        <div class="header text-center mb-5">
+            <h1 class="display-5">AI-Powered Test Case Generator</h1>
+            <p class="lead">Convert healthcare software requirements into compliant, traceable test cases.</p>
+        </div>
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <ul class="flash-messages">
+                <div class="alert alert-danger" role="alert">
                     {% for message in messages %}
-                        <li>{{ message }}</li>
+                        <p class="mb-0">{{ message }}</p>
                     {% endfor %}
-                </ul>
+                </div>
             {% endif %}
         {% endwith %}
 
-        <form method="post" enctype="multipart/form-data">
-            <input type="file" name="requirement_file" required>
-            <input type="submit" value="Generate Test Cases">
-        </form>
+        <div class="card mb-5">
+            <div class="card-body">
+                <h5 class="card-title">Upload Requirement Document</h5>
+                <p class="card-text">Select a requirement file (.txt, .docx, .pdf, .xml) to begin.</p>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="requirement_file" required>
+                        <button class="btn btn-primary" type="submit">Generate Test Cases</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        {% if gherkin_output %}
+        {% if test_data and test_data.test_cases %}
             <div class="results">
-                <h2>Generated Gherkin</h2>
-                <pre>{{ gherkin_output }}</pre>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Generated Test Cases</h2>
+                    <a href="/export/jira" class="btn btn-success">Export to Jira (CSV)</a>
+                </div>
+                {% for test in test_data.test_cases %}
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Test ID: {{ test.test_id }}</span>
+                            <small class="text-muted">Source: "{{ test.requirement_source }}"</small>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-gherkin">{{ test.gherkin_feature }}</code></pre>
+                        </div>
+                        <div class="card-footer bg-light">
+                            {% if test.compliance_tags %}
+                                <strong>Compliance Tags:</strong>
+                                {% for tag in test.compliance_tags %}
+                                    <span class="badge bg-secondary compliance-tag">{{ tag }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <small class="text-muted">No compliance tags identified.</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         {% endif %}
     </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Highlight.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        // Initialize highlight.js
+        hljs.highlightAll();
+    </script>
 </body>
 </html>
