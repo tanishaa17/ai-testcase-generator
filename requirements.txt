@@ -1,5 +1,7 @@
 google-generativeai
 python-dotenv
 jira
-python-docx
 pypdf
+python-docx
+Flask
+
