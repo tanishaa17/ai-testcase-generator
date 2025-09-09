@@ -1,0 +1,30 @@
+<requirements>
+  <requirement id="REQ-LOGIN-01">
+    <title>Successful User Login</title>
+    <description>
+      As a registered user of the healthcare portal,
+      I want to log in with my email and password,
+      so that I can access my personal health record.
+    </description>
+    <acceptance_criteria>
+      <criterion>Given the user is on the login page</criterion>
+      <criterion>When the user enters a valid email and password</criterion>
+      <criterion>And clicks the 'Login' button</criterion>
+      <criterion>Then the user should be redirected to their dashboard</criterion>
+    </acceptance_criteria>
+  </requirement>
+  <requirement id="REQ-LOGIN-02">
+    <title>Failed User Login</title>
+    <description>
+      As a user attempting to log in,
+      if I provide invalid credentials,
+      I should be shown an error message so I can try again.
+    </description>
+    <acceptance_criteria>
+      <criterion>Given the user is on the login page</criterion>
+      <criterion>When the user enters an invalid email or password</criterion>
+      <criterion>And clicks the 'Login' button</criterion>
+      <criterion>Then an 'Invalid credentials' error message should be displayed</criterion>
+    </acceptance_criteria>
+  </requirement>
+</requirements>

@@ -6,6 +6,7 @@ import argparse
 from jira import JIRA
 import docx
 from pypdf import PdfReader
+import xml.etree.ElementTree as ET
 
 # Load environment variables from the .env file
 load_dotenv(encoding="utf-8")
@@ -29,7 +30,6 @@ def configure_jira():
     print(f"Connecting to Jira server at: {server}")
     try:
         jira_client = JIRA(server=server, basic_auth=(user, api_token))
-        # Verify connection by getting server info
         jira_client.server_info()
         print("Jira connection successful.")
         return jira_client
@@ -38,7 +38,7 @@ def configure_jira():
 
 
 def read_requirement_file(file_path):
-    """Reads the content of the requirement file, supporting .txt, .pdf, and .docx."""
+    """Reads the content of the requirement file, supporting .txt, .pdf, .docx, and .xml."""
     try:
         if file_path.lower().endswith('.pdf'):
             reader = PdfReader(file_path)
@@ -52,16 +52,23 @@ def read_requirement_file(file_path):
             for para in doc.paragraphs:
                 text += para.text + '\n'
             return text
+        elif file_path.lower().endswith('.xml'):
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            text = ""
+            for elem in root.iter():
+                if elem.text and elem.text.strip():
+                    text += elem.text.strip() + '\n'
+            return text
         elif file_path.lower().endswith('.txt'):
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
         else:
-            raise ValueError(f"Unsupported file type: {file_path}. Only .txt, .pdf, and .docx are supported.")
+            raise ValueError(f"Unsupported file type: {file_path}. Only .txt, .pdf, .docx, and .xml are supported.")
     except FileNotFoundError:
         raise FileNotFoundError(f"Error: Requirement file not found at {file_path}")
     except Exception as e:
         raise Exception(f"An error occurred while reading the file: {e}")
-
 
 def generate_test_cases(requirement_text):
     """Generates test cases using the Gemini AI."""
@@ -93,30 +100,30 @@ def save_output_to_file(content, file_path):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
-        with open(file_path, 'w') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
         print(f"\nSuccessfully saved test cases to: {file_path}")
     except Exception as e:
         raise Exception(f"An error occurred while saving the file: {e}")
 
-def create_jira_issues(jira_client, gherkin_text):
-    """Parses Gherkin text and creates a Jira issue for each scenario."""
+def create_jira_issues(jira_client, gherkin_text, parent_issue_key=None):
+    """Parses Gherkin text and creates Jira issues, optionally as sub-tasks."""
     project_key = os.environ.get("JIRA_PROJECT_KEY")
     if not project_key or "PROJ" in project_key:
         raise ValueError("JIRA_PROJECT_KEY is not configured in .env file.")
 
     print(f"\n--- Creating Jira Issues in Project: {project_key} ---")
-    
-    # Split the feature file into individual scenarios
+    if parent_issue_key:
+        print(f"Linking new issues to parent: {parent_issue_key}")
+
     scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
     if len(scenarios) < 2:
         print("No scenarios found in the generated text. Skipping Jira creation.")
         return
 
-    feature_header = scenarios[0] # The part before the first scenario
+    feature_header = scenarios[0]
     
     for scenario_text in scenarios[1:]:
-        # The first line of the scenario is the title
         try:
             title = scenario_text.splitlines()[0].strip()
             
@@ -124,8 +131,13 @@ def create_jira_issues(jira_client, gherkin_text):
                 'project': {'key': project_key},
                 'summary': title,
                 'description': f"{{code:gherkin}}\n{feature_header}\n{scenario_text}{{code}}",
-                'issuetype': {'name': 'Task'},
             }
+
+            if parent_issue_key:
+                issue_dict['parent'] = {'key': parent_issue_key}
+                issue_dict['issuetype'] = {'name': 'Sub-task'}
+            else:
+                issue_dict['issuetype'] = {'name': 'Task'}
             
             new_issue = jira_client.create_issue(fields=issue_dict)
             print(f"Successfully created Jira issue: {new_issue.key} - '{title}'")
@@ -139,6 +151,7 @@ def main():
     parser.add_argument("-i", "--input", required=True, help="Path to the input requirement file.")
     parser.add_argument("-o", "--output", required=True, help="Path for the generated output Gherkin file.")
     parser.add_argument("--jira", action='store_true', help="If set, create issues in Jira for each test scenario.")
+    parser.add_argument("--parent-issue", help="Jira key of the parent issue for sub-tasks.")
     args = parser.parse_args()
 
     try:
@@ -155,7 +168,7 @@ def main():
 
         if args.jira:
             jira_client = configure_jira()
-            create_jira_issues(jira_client, generated_tests)
+            create_jira_issues(jira_client, generated_tests, args.parent_issue)
 
     except Exception as e:
         print(f"\nAn error occurred during execution: {e}")
