@@ -57,6 +57,10 @@
                 <h5 class="card-title">Upload Requirement Document</h5>
                 <p class="card-text">Select a requirement file (.txt, .docx, .pdf, .xml) to begin.</p>
                 <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="domain" class="form-label">Domain</label>
+                        <input type="text" class="form-control" name="domain" id="domain" placeholder="e.g., Healthcare, Finance, E-commerce" value="Healthcare">
+                    </div>
                     <div class="input-group">
                         <input type="file" class="form-control" name="requirement_file" required>
                         <button class="btn btn-primary" type="submit">Generate Test Cases</button>

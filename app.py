@@ -45,21 +45,21 @@ def read_requirement_file(file_path):
         print(f"Error reading file: {e}")
         raise
 
-def generate_test_cases(requirement_text):
+def generate_test_cases(requirement_text, domain="healthcare software"):
     """
     Generates structured test cases using the Gemini AI, focusing on compliance
-    and traceability for the healthcare domain.
+    and traceability for the specified domain.
     """
     prompt = (
-        "You are a world-class QA expert specializing in regulated healthcare software (FDA, IEC 62304, ISO 13485)."
+        f"You are a world-class QA expert specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance)."
         "Analyze the provided software requirement and generate a comprehensive set of test cases."
         "Your output MUST be a single, valid JSON object. Do not include any other text or markdown formatting."
         "The JSON object should have a single key: 'test_cases'."
         "The value should be a list of test case objects, where each object has the following keys:"
         '  - \"test_id\": A unique identifier for the test case (e.g., \"TC-001\").' 
         '  - \"requirement_source\": The specific requirement sentence or phrase this test case validates.'
-        '  - \"gherkin_feature\": The full, complete Gherkin text for the test case, starting with \"Feature:\".'
-        '  - \"compliance_tags\": A list of strings identifying relevant compliance standards (e.g., [\"ISO 13485\", \"GDPR\"]).'
+        '  - \"gherkin_feature\": The full, complete Gherkin text for the test case, starting with \"Feature:\".' 
+        '  - \"compliance_tags\": A list of strings identifying relevant compliance standards for the specified domain (e.g., [\"ISO 13485\", \"GDPR\"] for healthcare).' 
         "\n--- REQUIREMENT TEXT ---"
         f"{requirement_text}"
         "\n--- END REQUIREMENT TEXT ---"
@@ -106,12 +106,17 @@ def index():
 
         if file:
             try:
+                # Get the domain from the form, default to 'healthcare software'
+                domain = request.form.get('domain', 'healthcare software').strip()
+                if not domain:
+                    domain = 'healthcare software'
+
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(file_path)
 
                 configure_ai()
                 requirement_text = read_requirement_file(file_path)
-                test_data = generate_test_cases(requirement_text)
+                test_data = generate_test_cases(requirement_text, domain)
                 
                 # Store the generated data in the session for later export
                 session['last_test_data'] = test_data
@@ -122,6 +127,7 @@ def index():
                 flash(str(e))
             except Exception as e:
                 flash(f'An error occurred: {e}')
+
 
     return render_template('index.html', test_data=test_data)
 
