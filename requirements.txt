@@ -3,5 +3,6 @@ python-dotenv
 jira
 pypdf
 python-docx
-Flask
-Flask-Cors
+fastapi
+uvicorn[standard]
+python-multipart
