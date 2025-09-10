@@ -4,4 +4,4 @@ jira
 pypdf
 python-docx
 Flask
-
+Flask-Cors
