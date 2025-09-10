@@ -22,17 +22,18 @@ def configure_ai():
 
 # --- Jira Configuration ---
 
-def configure_jira():
-    """Connects to Jira using credentials from environment variables."""
-    server = os.environ.get("JIRA_SERVER")
-    user = os.environ.get("JIRA_USER")
-    api_token = os.environ.get("JIRA_API_TOKEN")
+def configure_jira(server=None, user=None, api_token=None):
+    """Connects to Jira using provided credentials, falling back to environment variables."""
+    # Prioritize provided arguments, fall back to environment variables
+    final_server = server or os.environ.get("JIRA_SERVER")
+    final_user = user or os.environ.get("JIRA_USER")
+    final_token = api_token or os.environ.get("JIRA_API_TOKEN")
 
-    if not all([server, user, api_token]) or "your-domain" in server or "your-email" in user or "your_api_token" in api_token:
-        raise ValueError("Jira credentials are not fully configured in .env file. Please check JIRA_SERVER, JIRA_USER, and JIRA_API_TOKEN.")
+    if not all([final_server, final_user, final_token]):
+        raise ValueError("Jira credentials are not fully configured or provided.")
 
     try:
-        jira_client = JIRA(server=server, basic_auth=(user, api_token))
+        jira_client = JIRA(server=final_server, basic_auth=(final_user, final_token))
         # Test connection
         jira_client.server_info()
         return jira_client
@@ -115,11 +116,11 @@ def save_output_to_file(content, file_path):
     except Exception as e:
         raise Exception(f"An error occurred while saving the file: {e}")
 
-def create_jira_issues(jira_client, gherkin_text, parent_issue_key=None):
-    """Parses Gherkin text and creates Jira issues, optionally as sub-tasks."""
-    project_key = os.environ.get("JIRA_PROJECT_KEY")
-    if not project_key or "PROJ" in project_key:
-        raise ValueError("JIRA_PROJECT_KEY is not configured in .env file.")
+def create_jira_issues(jira_client, gherkin_text, project_key=None, parent_issue_key=None):
+    """Parses Gherkin text and creates Jira issues, falling back to env for project key."""
+    final_project_key = project_key or os.environ.get("JIRA_PROJECT_KEY")
+    if not final_project_key:
+        raise ValueError("JIRA_PROJECT_KEY is not configured or provided.")
 
     scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
     if len(scenarios) < 2:
@@ -134,7 +135,7 @@ def create_jira_issues(jira_client, gherkin_text, parent_issue_key=None):
             title = scenario_text.splitlines()[0].strip()
             
             issue_dict = {
-                'project': {'key': project_key},
+                'project': {'key': final_project_key},
                 'summary': title,
                 'description': f"{{code:gherkin}}\n{feature_header}\n{scenario_text}{{code}}",
             }
