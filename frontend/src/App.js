@@ -14,15 +14,19 @@ import {
   Alert,
   CssBaseline,
   ThemeProvider,
-  createTheme
+  createTheme,
+  Divider
 } from '@mui/material';
-import { UploadFile, ArrowForward } from '@mui/icons-material';
+import { UploadFile, ArrowForward, ConfirmationNumber } from '@mui/icons-material';
 
 // Create a simple theme for a professional look
 const theme = createTheme({
   palette: {
     primary: {
       main: '#1976d2',
+    },
+    secondary: {
+      main: '#1a9c6b',
     },
     background: {
       default: '#f4f6f8',
@@ -42,13 +46,19 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [jiraLoading, setJiraLoading] = useState(false);
+  const [jiraError, setJiraError] = useState('');
+  const [jiraSuccess, setJiraSuccess] = useState('');
+
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setError('');
     setTestData(null);
+    setJiraSuccess('');
+    setJiraError('');
   };
 
-  const handleSubmit = async () => {
+  const handleGenerateSubmit = async () => {
     if (!file) {
       setError('Please select a requirement file first.');
       return;
@@ -57,6 +67,8 @@ function App() {
     setLoading(true);
     setError('');
     setTestData(null);
+    setJiraSuccess('');
+    setJiraError('');
 
     const formData = new FormData();
     formData.append('requirement_file', file);
@@ -75,6 +87,28 @@ function App() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJiraSubmit = async () => {
+    if (!testData) {
+      setJiraError('No test data available to send to Jira.');
+      return;
+    }
+
+    setJiraLoading(true);
+    setJiraError('');
+    setJiraSuccess('');
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/jira', testData);
+      setJiraSuccess(`${response.data.message} - Issues: ${response.data.issues.join(', ')}`)
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'An unexpected error occurred during Jira integration.';
+      setJiraError(errorMessage);
+      console.error(err);
+    } finally {
+      setJiraLoading(false);
     }
   };
 
@@ -117,7 +151,7 @@ function App() {
                 color="primary"
                 size="large"
                 endIcon={<ArrowForward />}
-                onClick={handleSubmit}
+                onClick={handleGenerateSubmit}
                 disabled={loading}
               >
                 Generate Test Cases
@@ -142,7 +176,25 @@ function App() {
 
         {testData && testData.test_cases && (
           <Box>
-            <Typography variant="h5" gutterBottom>Generated Test Cases</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h5" gutterBottom component="div">
+                Generated Test Cases
+              </Typography>
+              <Button
+                variant="contained"
+                color="secondary"
+                startIcon={<ConfirmationNumber />}
+                onClick={handleJiraSubmit}
+                disabled={jiraLoading}
+              >
+                Create in Jira
+              </Button>
+            </Box>
+            {jiraLoading && <CircularProgress sx={{mb: 2}}/>}
+            {jiraError && <Alert severity="error" sx={{ mb: 2 }}>{jiraError}</Alert>}
+            {jiraSuccess && <Alert severity="success" sx={{ mb: 2 }}>{jiraSuccess}</Alert>}
+            <Divider sx={{ mb: 2 }} />
+
             {testData.test_cases.map((test, index) => (
               <Card key={index} sx={{ mb: 2, boxShadow: 1 }}>
                 <CardHeader

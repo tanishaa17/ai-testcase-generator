@@ -1,0 +1,16 @@
+Requirement: User Profile Picture Upload
+
+  User Story:
+  As a registered user, I want to upload a profile picture to my account so that other users can identify me more easily and my profile feels more personalized.
+
+  Acceptance Criteria:
+
+   1. The user must be able to select an image file from their local machine via an "Upload Image" button on their profile page.
+   2. The system shall display a preview of the selected image before the user confirms the upload.
+   3. The system must only accept image files with the extensions .jpg, .jpeg, or .png.
+   4. The system must reject any file that is larger than 5 MB and display a user-friendly error message (e.g., "File size cannot exceed 5 MB").
+   5. The system must reject any file that is not one of the accepted types and display a user-friendly error message (e.g., "Invalid file type. Please upload a JPG or PNG.").
+   6. Upon successful upload, the new profile picture shall be displayed on the user's profile page immediately.
+   7. A success message (e.g., "Profile picture updated successfully!") shall be displayed to the user upon successful upload.
+   8. If the upload process fails for any server-side reason, a generic error message (e.g., "An error occurred while uploading. Please try again.") shall be displayed.
+   9. The uploaded image must be stored securely in the system's backend storage.
