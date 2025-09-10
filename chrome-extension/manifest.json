@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "AI Test Case Generator",
+  "version": "1.0",
+  "description": "Right-click on highlighted text to generate test cases.",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
