@@ -1,4 +1,7 @@
 google-generativeai
+google-cloud-aiplatform
+google-auth
+google-cloud-bigquery
 python-dotenv
 jira
 pypdf
