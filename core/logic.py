@@ -69,19 +69,20 @@ def read_requirement_file(file_path):
 
 def generate_test_cases(requirement_text, domain="healthcare software"):
     """
-    Generates structured test cases using the Gemini AI, focusing on compliance
-    and traceability for the specified domain.
+    Generates structured test cases with a compliance audit using the Gemini AI.
     """
-    # Using a triple-quoted f-string for a cleaner, safer prompt.
-    prompt = f"""You are a world-class QA expert specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance).
+    prompt = f"""You are a world-class QA expert and compliance auditor specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance).
 Analyze the provided software requirement and generate a comprehensive set of test cases.
 Your output MUST be a single, valid JSON object. Do not include any other text or markdown formatting.
 The JSON object should have a single key: 'test_cases'.
 The value should be a list of test case objects, where each object has the following keys:
-  - \"test_id\": A unique identifier for the test case (e.g., \"TC-001\").
-  - \"requirement_source\": The specific requirement sentence or phrase this test case validates.
-  - \"gherkin_feature\": The full, complete Gherkin text for the test case, starting with \"Feature:\".
-  - \"compliance_tags\": A list of strings identifying relevant compliance standards for the specified domain (e.g., [\"ISO 13485\", \"GDPR\"])
+  - "test_id": A unique identifier for the test case (e.g., "TC-001").
+  - "requirement_source": The specific requirement sentence or phrase this test case validates.
+  - "gherkin_feature": The full, complete Gherkin text for the test case, starting with "Feature:".
+  - "compliance_tags": A list of strings identifying relevant compliance standards for the specified domain (e.g., ["ISO 13485", "GDPR"]).
+  - "compliance_assessment": An object containing an AI-powered audit of the test case. It must have two keys:
+    - "status": A string, either "Compliant" or "Non-Compliant".
+    - "reasoning": A detailed string explaining *why* the test case is or is not compliant with the specified standards, referencing the requirement.
 
 --- REQUIREMENT TEXT ---
 {requirement_text}
