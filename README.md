@@ -88,7 +88,7 @@ You need **two terminals** running simultaneously.
 - **Terminal 2 (Frontend)**:
   - Navigate to the `hackathon-project/frontend` folder.
   - Run the command: `npm start`
-  - This will automatically open the web application in your browser at `http://localhost:3000`.
+  - This will automatically open the web application in your browser at `https://ai-testcase-generator-umber.vercel.app/`.
 
 ### 3. Loading the Chrome Extension
 
@@ -199,7 +199,7 @@ You need **two terminals** running simultaneously.
 - **Terminal 2 (Frontend)**:
   - Navigate to the `hackathon-project/frontend` folder.
   - Run the command: `npm start`
-  - This will automatically open the web application in your browser at `http://localhost:3000`.
+  - This will automatically open the web application in your browser at `https://ai-testcase-generator-umber.vercel.app/`.
 
 ### 3. Loading the Chrome Extension
 
