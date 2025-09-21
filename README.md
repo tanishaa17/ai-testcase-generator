@@ -62,7 +62,7 @@ Follow these steps to run the complete application on your local machine.
 
 ### 1. One-Time Setup
 
-- **Configure Credentials**: In the root `hackathon-project` folder, create or edit the `.env` file. It must contain your credentials:
+- **Configure Credentials**: In the root `ai-testcase-generator` folder, create or edit the `.env` file. It must contain your credentials:
   ```
   GEMINI_API_KEY=your_gemini_key_here
   JIRA_SERVER=https://your-domain.atlassian.net
@@ -71,7 +71,7 @@ Follow these steps to run the complete application on your local machine.
   JIRA_PROJECT_KEY=PROJ # Your default Jira Project Key
   ```
 
-- **Install Backend Dependencies**: Open a terminal in the `hackathon-project` folder and run:
+- **Install Backend Dependencies**: Open a terminal in the `ai-testcase-generator` folder and run:
   ```bash
   pip install -r requirements.txt
   ```
@@ -86,12 +86,12 @@ Follow these steps to run the complete application on your local machine.
 You need **two terminals** running simultaneously.
 
 - **Terminal 1 (Backend)**:
-  - Navigate to the `hackathon-project` folder.
+  - Navigate to the `ai-testcase-generator` folder.
   - Run the command: `python app.py`
   - Leave this running. It will serve the API at `http://localhost:5000`.
 
 - **Terminal 2 (Frontend)**:
-  - Navigate to the `hackathon-project/frontend` folder.
+  - Navigate to the `ai-testcase-generator/frontend` folder.
   - Run the command: `npm start`
   - This will automatically open the web application in your browser at `http://localhost:3000`.
 
@@ -99,7 +99,7 @@ You need **two terminals** running simultaneously.
 
 - Open Google Chrome and navigate to `chrome://extensions`.
 - Turn on **"Developer mode"** in the top-right corner.
-- Click **"Load unpacked"** and select the entire `hackathon-project/chrome-extension` folder.
+- Click **"Load unpacked"** and select the entire `ai-testcase-generator/chrome-extension` folder.
 - The extension will now be active.
 
 ---
@@ -127,6 +127,7 @@ You need **two terminals** running simultaneously.
 - **AI-Powered Refinement**: Add a feature to allow users to give feedback to the AI (e.g., "make this test more security-focused") to regenerate and improve a specific test case.
 - **Support for More ALM Tools**: Expand the API integration to support other platforms like Azure DevOps and Polarion.
 - **Advanced Analytics**: Create a dashboard to track metrics like the number of test cases generated, compliance coverage, and integration success rates.
+
 
 
 <!-- # AI-Powered Test Case Generator
