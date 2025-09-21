@@ -154,10 +154,10 @@ function App() {
       <Container maxWidth="lg" sx={{ my: 4 }}>
         <Box sx={{ textAlign: 'center', mb: 5, p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1, position: 'relative' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            AI-Powered Test Case Generator
+            Gen-AI Test Case Auditor
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            Automatically convert software requirements into compliant, traceable test cases.
+            From Raw Requirements to Audit-Ready Test Cases with AI-Powered Risk Scoring.
           </Typography>
           <Tooltip title="Jira Settings">
             <IconButton onClick={() => setSettingsOpen(true)} sx={{ position: 'absolute', top: 8, right: 8 }}>
