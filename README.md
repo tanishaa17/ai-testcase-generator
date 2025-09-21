@@ -1,5 +1,15 @@
 # Gen-AI Test Case Auditor
 
+---
+
+## 🚀 Live Demo
+
+**You can view the live, deployed application here:**
+
+### [https://ai-testcase-generator-umber.vercel.app/](https://ai-testcase-generator-umber.vercel.app/)
+
+---
+
 A sophisticated, AI-powered system that automatically converts software requirements from multiple formats into compliant, traceable, and audit-ready test cases, complete with risk analysis and seamless integration with enterprise toolchains like Jira.
 
 ---
@@ -13,15 +23,13 @@ In highly regulated industries like healthcare and finance, QA teams spend enorm
 This isn't just a simple script; it's a feature-rich platform built with a modern, scalable architecture.
 
 - **AI-Powered Audit & Risk Analysis**: This is the core innovation. For every generated test case, the AI also provides:
-
-  - A **Compliance Audit** that reasons about how the test meets regulatory standards (e.g., FDA, HIPAA).
-  - A **Risk & Priority Score** that assesses the business impact of a potential failure, allowing teams to prioritize testing efforts intelligently.
+    - A **Compliance Audit** that reasons about how the test meets regulatory standards (e.g., FDA, HIPAA).
+    - A **Risk & Priority Score** that assesses the business impact of a potential failure, allowing teams to prioritize testing efforts intelligently.
 
 - **Flexible Requirement Input**: Handles requirements from multiple sources to fit any workflow:
-
-  - **File Upload**: PDF, DOCX, XML, and TXT.
-  - **Direct Text Entry**: A text area to type or paste requirements directly.
-  - **In-Context Generation**: A Chrome Extension to generate tests from highlighted text on any webpage.
+    - **File Upload**: PDF, DOCX, XML, and TXT.
+    - **Direct Text Entry**: A text area to type or paste requirements directly.
+    - **In-Context Generation**: A Chrome Extension to generate tests from highlighted text on any webpage.
 
 - **True Jira Integration**: Go beyond simple exports. Create test cases as actual tickets in any Jira project directly via the API.
 
@@ -55,7 +63,6 @@ Follow these steps to run the complete application on your local machine.
 ### 1. One-Time Setup
 
 - **Configure Credentials**: In the root `hackathon-project` folder, create or edit the `.env` file. It must contain your credentials:
-
   ```
   GEMINI_API_KEY=your_gemini_key_here
   JIRA_SERVER=https://your-domain.atlassian.net
@@ -65,7 +72,6 @@ Follow these steps to run the complete application on your local machine.
   ```
 
 - **Install Backend Dependencies**: Open a terminal in the `hackathon-project` folder and run:
-
   ```bash
   pip install -r requirements.txt
   ```
@@ -80,15 +86,14 @@ Follow these steps to run the complete application on your local machine.
 You need **two terminals** running simultaneously.
 
 - **Terminal 1 (Backend)**:
-
   - Navigate to the `hackathon-project` folder.
   - Run the command: `python app.py`
-  - Leave this running. It will serve the API at `https://ai-testcase-generator-583h.onrender.com`.
+  - Leave this running. It will serve the API at `http://localhost:5000`.
 
 - **Terminal 2 (Frontend)**:
   - Navigate to the `hackathon-project/frontend` folder.
   - Run the command: `npm start`
-  - This will automatically open the web application in your browser at `https://ai-testcase-generator-umber.vercel.app/`.
+  - This will automatically open the web application in your browser at `http://localhost:3000`.
 
 ### 3. Loading the Chrome Extension
 
@@ -104,7 +109,7 @@ You need **two terminals** running simultaneously.
 ### Web Application
 
 1.  **Generate Tests**: Select a domain, then either **upload a requirement document** or **type the requirement** into the text box, and click "Generate Test Cases".
-2.  **Create Jira Tickets**:
+2.  **Create Jira Tickets**: 
     - To use the default credentials from your `.env` file, simply click "Create in Jira".
     - To use custom credentials, click the **Settings icon (⚙️)**, enter the details for another Jira instance, click "Save", and then click "Create in Jira".
 
@@ -122,6 +127,7 @@ You need **two terminals** running simultaneously.
 - **AI-Powered Refinement**: Add a feature to allow users to give feedback to the AI (e.g., "make this test more security-focused") to regenerate and improve a specific test case.
 - **Support for More ALM Tools**: Expand the API integration to support other platforms like Azure DevOps and Polarion.
 - **Advanced Analytics**: Create a dashboard to track metrics like the number of test cases generated, compliance coverage, and integration success rates.
+
 
 <!-- # AI-Powered Test Case Generator
 
