@@ -9,7 +9,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "http://localhost:5000/*"
+    "https://ai-testcase-generator-583h.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"

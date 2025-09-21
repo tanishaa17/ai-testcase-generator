@@ -18,7 +18,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     const requirementText = info.selectionText;
 
     // Define the API endpoint
-    const apiUrl = 'http://localhost:5000/api/generate-from-text';
+    const apiUrl = 'https://ai-testcase-generator-583h.onrender.com/api/generate-from-text';
 
     // Make the API call to the backend
     fetch(apiUrl, {

@@ -25,7 +25,6 @@ import {
 } from '@mui/material';
 import { UploadFile, ArrowForward, ConfirmationNumber, Settings } from '@mui/icons-material';
 
-// Create a simple theme for a professional look
 const theme = createTheme({
   palette: {
     primary: {
@@ -46,8 +45,8 @@ const theme = createTheme({
 });
 
 function App() {
-  // UI State
   const [file, setFile] = useState(null);
+  const [requirementText, setRequirementText] = useState('');
   const [domain, setDomain] = useState('Healthcare');
   const [testData, setTestData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -57,16 +56,9 @@ function App() {
   const [jiraSuccess, setJiraSuccess] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Settings State
-  const [settings, setSettings] = useState({
-    server: '',
-    user: '',
-    apiToken: '',
-    projectKey: ''
-  });
+  const [settings, setSettings] = useState({ server: '', user: '', apiToken: '', projectKey: '' });
   const [isSettingsValid, setIsSettingsValid] = useState(false);
 
-  // Load settings from localStorage on initial render
   useEffect(() => {
     const savedSettings = localStorage.getItem('jiraSettings');
     if (savedSettings) {
@@ -74,10 +66,8 @@ function App() {
     }
   }, []);
 
-  // Validate settings whenever they change
   useEffect(() => {
     const { server, user, apiToken, projectKey } = settings;
-    // Simple validation: check if all fields are non-empty and trimmed
     if (server.trim() && user.trim() && apiToken.trim() && projectKey.trim()) {
       setIsSettingsValid(true);
     } else {
@@ -97,15 +87,21 @@ function App() {
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setRequirementText(''); // Clear text input when file is selected
     setError('');
     setTestData(null);
     setJiraSuccess('');
     setJiraError('');
   };
 
+  const handleTextChange = (e) => {
+    setRequirementText(e.target.value);
+    setFile(null); // Clear file input when text is entered
+  };
+
   const handleGenerateSubmit = async () => {
-    if (!file) {
-      setError('Please select a requirement file first.');
+    if (!file && !requirementText.trim()) {
+      setError('Please either upload a requirement file or type the requirement.');
       return;
     }
     setLoading(true);
@@ -113,11 +109,20 @@ function App() {
     setTestData(null);
     setJiraSuccess('');
     setJiraError('');
-    const formData = new FormData();
-    formData.append('requirement_file', file);
-    formData.append('domain', domain);
+
     try {
-      const response = await axios.post('http://localhost:5000/api/generate', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      let response;
+      if (requirementText.trim()) {
+        // Generate from text
+        const payload = { requirement_text: requirementText, domain: domain };
+        response = await axios.post('https://ai-testcase-generator-583h.onrender.com/api/generate-from-text', payload);
+      } else {
+        // Generate from file
+        const formData = new FormData();
+        formData.append('requirement_file', file);
+        formData.append('domain', domain);
+        response = await axios.post('https://ai-testcase-generator-583h.onrender.com/api/generate', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
       setTestData(response.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'An unexpected error occurred.');
@@ -134,12 +139,9 @@ function App() {
     setJiraLoading(true);
     setJiraError('');
     setJiraSuccess('');
-    const payload = {
-      test_cases: testData.test_cases,
-      credentials: settings
-    };
+    const payload = { test_cases: testData.test_cases, credentials: settings };
     try {
-      const response = await axios.post('http://localhost:5000/api/jira', payload);
+      const response = await axios.post('https://ai-testcase-generator-583h.onrender.com/api/jira', payload);
       setJiraSuccess(`${response.data.message} - Issues: ${response.data.issues.join(', ')}`)
     } catch (err) {
       setJiraError(err.response?.data?.detail || 'An unexpected error occurred during Jira integration.');
@@ -166,7 +168,6 @@ function App() {
           </Tooltip>
         </Box>
 
-        {/* Settings Dialog */}
         <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle>Jira Configuration</DialogTitle>
           <DialogContent>
@@ -186,11 +187,23 @@ function App() {
           <Box component="form" noValidate autoComplete="off">
             <Typography variant="h6" gutterBottom>1. Specify Domain</Typography>
             <TextField fullWidth label="Domain" variant="outlined" value={domain} onChange={(e) => setDomain(e.target.value)} sx={{ mb: 3 }} />
-            <Typography variant="h6" gutterBottom>2. Upload Requirement</Typography>
+            
+            <Typography variant="h6" gutterBottom>2. Provide Requirement</Typography>
             <Button variant="contained" component="label" startIcon={<UploadFile />}>
               {file ? file.name : 'Select File'}
               <input type="file" hidden onChange={handleFileChange} />
             </Button>
+            <Typography color="text.secondary" sx={{ my: 1, textAlign: 'center' }}>OR</Typography>
+            <TextField
+              fullWidth
+              label="Type or paste requirement here"
+              variant="outlined"
+              multiline
+              rows={4}
+              value={requirementText}
+              onChange={handleTextChange}
+            />
+
             <Box sx={{ mt: 4, position: 'relative', textAlign: 'center' }}>
               <Button variant="contained" color="primary" size="large" endIcon={<ArrowForward />} onClick={handleGenerateSubmit} disabled={loading}>
                 Generate Test Cases
