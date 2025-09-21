@@ -69,9 +69,9 @@ def read_requirement_file(file_path):
 
 def generate_test_cases(requirement_text, domain="healthcare software"):
     """
-    Generates structured test cases with a compliance audit using the Gemini AI.
+    Generates structured test cases with a compliance audit and risk score using the Gemini AI.
     """
-    prompt = f"""You are a world-class QA expert and compliance auditor specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance).
+    prompt = f"""You are a world-class QA expert, compliance auditor, and risk assessor specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance).
 Analyze the provided software requirement and generate a comprehensive set of test cases.
 Your output MUST be a single, valid JSON object. Do not include any other text or markdown formatting.
 The JSON object should have a single key: 'test_cases'.
@@ -82,7 +82,10 @@ The value should be a list of test case objects, where each object has the follo
   - "compliance_tags": A list of strings identifying relevant compliance standards for the specified domain (e.g., ["ISO 13485", "GDPR"]).
   - "compliance_assessment": An object containing an AI-powered audit of the test case. It must have two keys:
     - "status": A string, either "Compliant" or "Non-Compliant".
-    - "reasoning": A detailed string explaining *why* the test case is or is not compliant with the specified standards, referencing the requirement.
+    - "reasoning": A detailed string explaining *why* the test case is or is not compliant with the specified standards.
+  - "risk_and_priority": An object containing an AI-powered risk assessment. It must have two keys:
+    - "score": An integer from 1 (lowest priority) to 10 (highest priority).
+    - "reasoning": A detailed string explaining the score, based on the potential business, user, or compliance impact if the feature fails.
 
 --- REQUIREMENT TEXT ---
 {requirement_text}
