@@ -2,10 +2,14 @@ google-generativeai
 google-cloud-aiplatform
 google-auth
 google-cloud-bigquery
+firebase-admin
 python-dotenv
 jira
+azure-devops
 pypdf
 python-docx
 fastapi
 uvicorn[standard]
 python-multipart
+msrest
+requests
