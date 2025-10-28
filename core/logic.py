@@ -7,6 +7,11 @@ from jira import JIRA
 import docx
 from pypdf import PdfReader
 import xml.etree.ElementTree as ET
+from azure.devops.connection import Connection
+from msrest.authentication import BasicAuthentication
+import requests
+from datetime import datetime
+import base64
 
 # Load environment variables from the .env file
 load_dotenv(encoding="utf-8")
@@ -40,6 +45,138 @@ def configure_jira(server=None, user=None, api_token=None):
     except Exception as e:
         raise Exception(f"Jira connection failed: {e}")
 
+# --- Azure DevOps Configuration ---
+
+def configure_azure_devops(organization=None, personal_access_token=None):
+    """Connects to Azure DevOps using provided credentials."""
+    final_org = organization or os.environ.get("AZURE_DEVOPS_ORGANIZATION")
+    final_token = personal_access_token or os.environ.get("AZURE_DEVOPS_PAT")
+
+    if not all([final_org, final_token]):
+        raise ValueError("Azure DevOps credentials are not fully configured or provided.")
+
+    try:
+        credentials = BasicAuthentication('', final_token)
+        connection = Connection(base_url=f"https://dev.azure.com/{final_org}", creds=credentials)
+        return connection
+    except Exception as e:
+        raise Exception(f"Azure DevOps connection failed: {e}")
+
+def create_azure_devops_work_items(connection, gherkin_text, project=None):
+    """Creates work items in Azure DevOps from Gherkin scenarios."""
+    final_project = project or os.environ.get("AZURE_DEVOPS_PROJECT")
+    if not final_project:
+        raise ValueError("Azure DevOps project is not configured.")
+
+    scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
+    if len(scenarios) < 2:
+        print("No scenarios found in the generated text. Skipping Azure DevOps creation.")
+        return []
+
+    feature_header = scenarios[0]
+    created_items = []
+    
+    try:
+        wit_client = connection.clients.get_work_item_tracking_client()
+        
+        for scenario_text in scenarios[1:]:
+            title = scenario_text.splitlines()[0].strip()
+            description = f"```gherkin\n{feature_header}\n{scenario_text}\n```"
+            
+            # Create work item document
+            work_item = {
+                "op": "add",
+                "path": "/fields/System.Title",
+                "value": title
+            }
+            
+            work_item_body = {
+                "op": "add",
+                "path": "/fields/System.Description",
+                "value": description
+            }
+            
+            work_item_additional = {
+                "op": "add",
+                "path": "/fields/System.WorkItemType",
+                "value": "Test Case"
+            }
+            
+            document = [work_item, work_item_body, work_item_additional]
+            
+            result = wit_client.create_work_item(document=document, project=final_project, type="Test Case")
+            created_items.append(result.id)
+            print(f"Successfully created Azure DevOps work item: {result.id} - '{title}'")
+    except Exception as e:
+        print(f"Failed to create Azure DevOps work item: {e}")
+    
+    return created_items
+
+# --- Polarion Configuration ---
+
+def configure_polarion(url=None, user=None, password=None):
+    """Connects to Polarion using provided credentials."""
+    final_url = url or os.environ.get("POLARION_URL")
+    final_user = user or os.environ.get("POLARION_USER")
+    final_password = password or os.environ.get("POLARION_PASSWORD")
+
+    if not all([final_url, final_user, final_password]):
+        raise ValueError("Polarion credentials are not fully configured or provided.")
+
+    try:
+        # Basic authentication token
+        credentials = f"{final_user}:{final_password}"
+        token = base64.b64encode(credentials.encode()).decode()
+        return {"url": final_url, "token": token, "user": final_user}
+    except Exception as e:
+        raise Exception(f"Polarion connection failed: {e}")
+
+def create_polarion_test_cases(polarion_config, gherkin_text, project_id=None):
+    """Creates test cases in Polarion from Gherkin scenarios."""
+    final_project = project_id or os.environ.get("POLARION_PROJECT_ID")
+    if not final_project:
+        raise ValueError("Polarion project ID is not configured.")
+
+    scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
+    if len(scenarios) < 2:
+        print("No scenarios found in the generated text. Skipping Polarion creation.")
+        return []
+
+    feature_header = scenarios[0]
+    created_items = []
+    headers = {"Authorization": f"Basic {polarion_config['token']}"}
+    base_url = polarion_config['url']
+    
+    for scenario_text in scenarios[1:]:
+        try:
+            title = scenario_text.splitlines()[0].strip()
+            content = f"<pre>{feature_header}\n{scenario_text}</pre>"
+            
+            # Create test case using Polarion REST API
+            test_case_data = {
+                "project": final_project,
+                "workitemtype": "testcase",
+                "title": title,
+                "description": content
+            }
+            
+            response = requests.post(
+                f"{base_url}/ws/WorkItemService/createWorkItem",
+                json=test_case_data,
+                headers=headers
+            )
+            
+            if response.status_code == 200:
+                created_items.append(title)
+                print(f"Successfully created Polarion test case: '{title}'")
+            else:
+                print(f"Failed to create Polarion test case: '{title}'. Error: {response.text}")
+                
+        except Exception as e:
+            print(f"Failed to create Polarion test case: '{title}'. Error: {e}")
+    
+    return created_items
+
 # --- File Processing ---
 
 def read_requirement_file(file_path):
@@ -70,30 +207,40 @@ def read_requirement_file(file_path):
 def generate_test_cases(requirement_text, domain="healthcare software"):
     """
     Generates structured test cases with a compliance audit and risk score using the Gemini AI.
+    Enhanced with GDPR compliance checks and deeper regulatory analysis.
     """
-    prompt = f"""You are a world-class QA expert, compliance auditor, and risk assessor specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, or PCI-DSS for finance).
+    prompt = f"""You are a world-class QA expert, compliance auditor, and risk assessor specializing in {domain} (e.g., regulated standards like FDA, IEC 62304 for healthcare, HIPAA, ISO 13485, GDPR, or PCI-DSS for finance).
 Analyze the provided software requirement and generate a comprehensive set of test cases.
+
+IMPORTANT: For healthcare domains, ensure GDPR and data privacy compliance is thoroughly addressed.
+
 Your output MUST be a single, valid JSON object. Do not include any other text or markdown formatting.
 The JSON object should have a single key: 'test_cases'.
 The value should be a list of test case objects, where each object has the following keys:
   - "test_id": A unique identifier for the test case (e.g., "TC-001").
   - "requirement_source": The specific requirement sentence or phrase this test case validates.
   - "gherkin_feature": The full, complete Gherkin text for the test case, starting with "Feature:".
-  - "compliance_tags": A list of strings identifying relevant compliance standards for the specified domain (e.g., ["ISO 13485", "GDPR"]).
+  - "compliance_tags": A list of strings identifying relevant compliance standards. MUST include GDPR for any data processing, ISO 13485/62304 for medical devices, HIPAA for US healthcare data, etc.
   - "compliance_assessment": An object containing an AI-powered audit of the test case. It must have two keys:
     - "status": A string, either "Compliant" or "Non-Compliant".
-    - "reasoning": A detailed string explaining *why* the test case is or is not compliant with the specified standards.
+    - "reasoning": A detailed string explaining *why* the test case is or is not compliant with the specified standards, including specific GDPR considerations like data minimization, purpose limitation, user consent, and right to erasure where applicable.
   - "risk_and_priority": An object containing an AI-powered risk assessment. It must have two keys:
     - "score": An integer from 1 (lowest priority) to 10 (highest priority).
-    - "reasoning": A detailed string explaining the score, based on the potential business, user, or compliance impact if the feature fails.
+    - "reasoning": A detailed string explaining the score, based on the potential business, user, compliance (GDPR violations can result in fines up to 4% of global revenue), or patient safety impact if the feature fails.
+  - "gdpr_compliance": An object (OPTIONAL, but MUST be included if the requirement involves any personal data). It contains:
+    - "applies": A boolean indicating if GDPR applies to this test case.
+    - "checks": An array of specific GDPR compliance checks being validated (e.g., ["Right to Access", "Data Minimization", "Consent Management"]).
+    - "risks": An array of potential GDPR violation risks (e.g., ["Unauthorized access to personal data", "Insufficient consent mechanisms"]).
 
 --- REQUIREMENT TEXT ---
 {requirement_text}
 --- END REQUIREMENT TEXT ---
-Produce the JSON output now.
+
+Produce the JSON output now with comprehensive compliance analysis.
 """
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # Use the latest available model
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content(prompt)
 
     try:
@@ -158,3 +305,44 @@ def create_jira_issues(jira_client, gherkin_text, project_key=None, parent_issue
             print(f"Failed to create Jira issue for scenario: '{title}'. Error: {e}")
     
     return created_issues
+
+# --- Requirements Traceability Matrix Generation ---
+
+def generate_traceability_matrix(requirement_text, test_cases):
+    """
+    Generates a Requirements Traceability Matrix (RTM) that maps requirements to test cases.
+    This is critical for FDA, IEC 62304, and ISO 13485 compliance.
+    """
+    matrix = {
+        "requirement_text": requirement_text,
+        "generation_timestamp": datetime.now().isoformat(),
+        "total_test_cases": len(test_cases),
+        "traceability_mapping": []
+    }
+    
+    # Extract key requirements from the requirement text
+    # Simple approach: split by sentences
+    requirements = [req.strip() for req in requirement_text.split('.') if len(req.strip()) > 50]
+    
+    for i, requirement in enumerate(requirements[:20], 1):  # Limit to 20 requirements
+        requirement_id = f"REQ-{i:03d}"
+        
+        # Find related test cases by checking requirement_source
+        related_tests = [
+            {
+                "test_id": tc.get("test_id", ""),
+                "compliance_status": tc.get("compliance_assessment", {}).get("status", "Unknown"),
+                "risk_score": tc.get("risk_and_priority", {}).get("score", 0)
+            }
+            for tc in test_cases 
+            if requirement_id in tc.get("requirement_source", "")[:100]  # Simple matching
+        ]
+        
+        matrix["traceability_mapping"].append({
+            "requirement_id": requirement_id,
+            "requirement_text": requirement[:200] + "..." if len(requirement) > 200 else requirement,
+            "related_test_cases": related_tests if related_tests else [{"test_id": "No direct mapping", "note": "Requirement not directly mapped to test cases"}],
+            "coverage_status": "Covered" if related_tests else "Not Covered"
+        })
+    
+    return matrix

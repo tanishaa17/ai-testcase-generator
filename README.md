@@ -1,242 +1,478 @@
-# Gen-AI Test Case Auditor
+# 🏥 Gen-AI Test Case Auditor for Healthcare
+
+**AI-Powered Test Case Generation with Healthcare Compliance (FDA, HIPAA, GDPR, ISO 13485)**
+
+An enterprise-grade system that automatically converts healthcare software requirements into compliant, traceable test cases with seamless integration to Jira, Azure DevOps, and Polarion.
 
 ---
 
 ## 🚀 Live Demo
 
-**You can view the live, deployed application here:**
-
-### [https://ai-testcase-generator-umber.vercel.app/](https://ai-testcase-generator-umber.vercel.app/)
+**Deployed Application**: [https://ai-testcase-generator-umber.vercel.app/](https://ai-testcase-generator-umber.vercel.app/)
 
 ---
 
-A sophisticated, AI-powered system that automatically converts software requirements from multiple formats into compliant, traceable, and audit-ready test cases, complete with risk analysis and seamless integration with enterprise toolchains like Jira.
+## 📋 Table of Contents
+
+- [Problem Statement](#problem-statement)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Reference](#api-reference)
+- [Healthcare Compliance](#healthcare-compliance)
+- [Integration Guide](#integration-guide)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## The Challenge
+## 🎯 Problem Statement
 
-In highly regulated industries like healthcare and finance, QA teams spend enormous time manually converting complex requirement documents into test cases, ensuring compliance, and maintaining traceability. This project was built to solve that problem by automating the most tedious and critical parts of the QA lifecycle.
+Healthcare software development faces critical challenges:
+- **Manual test creation** consuming 80% of QA time
+- **Complex regulatory requirements** (FDA, HIPAA, GDPR, ISO 13485, IEC 62304)
+- **Lack of traceability** making audits difficult
+- **Limited integration** with existing enterprise ALM tools
 
-## Key Features
-
-This isn't just a simple script; it's a feature-rich platform built with a modern, scalable architecture.
-
-- **AI-Powered Audit & Risk Analysis**: This is the core innovation. For every generated test case, the AI also provides:
-    - A **Compliance Audit** that reasons about how the test meets regulatory standards (e.g., FDA, HIPAA).
-    - A **Risk & Priority Score** that assesses the business impact of a potential failure, allowing teams to prioritize testing efforts intelligently.
-
-- **Flexible Requirement Input**: Handles requirements from multiple sources to fit any workflow:
-    - **File Upload**: PDF, DOCX, XML, and TXT.
-    - **Direct Text Entry**: A text area to type or paste requirements directly.
-    - **In-Context Generation**: A Chrome Extension to generate tests from highlighted text on any webpage.
-
-- **True Jira Integration**: Go beyond simple exports. Create test cases as actual tickets in any Jira project directly via the API.
-
-- **Dynamic, User-Specific Configuration**: A user-friendly settings panel allows users to connect their own Jira instance. The system intelligently falls back to default `.env` credentials if none are provided.
-
-- **Asynchronous & Scalable Backend**: Built with **FastAPI**, the backend is asynchronous and can handle multiple concurrent requests without blocking, making it highly performant and scalable.
-
-- **Modern & Responsive Frontend**: The user interface is a professional-grade **React + MUI** single-page application (SPA), offering a smooth user experience.
-
-## Architecture
-
-The project uses a modern, decoupled architecture:
-
-- **Backend**: A powerful and scalable API server built with Python and FastAPI.
-- **Frontend**: A dynamic and responsive user interface built with React and Material-UI (MUI).
-- **Core Logic Module**: A centralized, shared module contains all the business logic for AI interaction, file processing, and Jira integration, ensuring the codebase is clean, professional, and easy to maintain (DRY principle).
-
-## Tech Stack
-
-- **Backend**: Python, FastAPI, Uvicorn
-- **Frontend**: React, Material-UI (MUI), Axios
-- **Core AI**: Google Gemini
-- **Integrations**: Jira API
+**This system solves all of the above.**
 
 ---
 
-## Local Setup and Running the Project
+## ✨ Key Features
 
-Follow these steps to run the complete application on your local machine.
+### 🤖 AI-Powered Generation
+- **Test Case Generation**: Automatically creates comprehensive test cases from requirements
+- **Compliance Audit**: AI validates FDA, HIPAA, GDPR, ISO 13485, IEC 62304 compliance
+- **Risk Assessment**: Priority scoring (1-10) based on business and compliance impact
+- **GDPR Checks**: Data protection, consent management, right to erasure validation
 
-### 1. One-Time Setup
+### 🔗 Multi-Platform ALM Integration
+- **Jira**: Create test cases as tickets
+- **Azure DevOps**: Create work items automatically
+- **Polarion**: Healthcare-specific ALM support
 
-- **Configure Credentials**: In the root `ai-testcase-generator` folder, create or edit the `.env` file. It must contain your credentials:
-  ```
-  GEMINI_API_KEY=your_gemini_key_here
-  JIRA_SERVER=https://your-domain.atlassian.net
-  JIRA_USER=your-jira-email@example.com
-  JIRA_API_TOKEN=your_jira_api_token_here
-  JIRA_PROJECT_KEY=PROJ # Your default Jira Project Key
-  ```
+### 📊 Advanced Capabilities
+- **Context Management**: Store and recall contextual information for continuous improvement
+- **Feature Gap Analysis**: AI identifies missing test coverage
+- **Traceability Matrix**: Automatic RTM for FDA/ISO 13485 audit readiness
+- **Multi-Format Export**: JSON, Gherkin, XML, DOCX
 
-- **Install Backend Dependencies**: Open a terminal in the `ai-testcase-generator` folder and run:
+### 📄 Flexible Input
+- **File Upload**: PDF, DOCX, XML, TXT
+- **Direct Text Entry**: Type or paste requirements
+- **Chrome Extension**: Generate from any webpage
+
+### 🏗️ Production-Ready
+- **Scalable Architecture**: Horizontal scaling, stateless design
+- **Error Handling**: Comprehensive error management
+- **API-First**: Easy integration with any system
+- **Health Monitoring**: Health check endpoint
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  EXTERNAL SYSTEMS                       │
+│     Jira   │  Azure DevOps  │   Polarion  │  Custom    │
+└────────────┼───────────────┼────────────┼──────────────┘
+             │               │            │
+             └───────────────┴────────────┘
+                             │
+      ┌──────────────────────▼───────────────────────┐
+      │         REST API Layer (FastAPI)             │
+      │  • Multi-format support • Rate limiting     │
+      └──────────────────────┬───────────────────────┘
+                             │
+      ┌──────────────────────▼───────────────────────┐
+      │          Application Layer                   │
+      │  • Context Manager  • Feature Analyzer       │
+      │  • Export Manager   • Traceability Engine    │
+      └──────────────────────┬───────────────────────┘
+                             │
+      ┌──────────────────────▼───────────────────────┐
+      │         Business Logic (core/)               │
+      │  • AI Test Generation • Compliance Audit     │
+      │  • Risk Assessment   • ALM Integration       │
+      └──────────────────────┬───────────────────────┘
+                             │
+      ┌──────────────────────▼───────────────────────┐
+      │         AI Layer (Google Gemini 2.5)         │
+      │  • Healthcare domain knowledge               │
+      │  • Regulatory compliance expertise           │
+      └──────────────────────────────────────────────┘
+```
+
+### Core Modules
+
+- **`core/logic.py`**: Test generation with compliance auditing
+- **`core/context_manager.py`**: Context lifecycle management
+- **`core/feature_analyzer.py`**: AI-powered gap analysis
+- **`core/export_manager.py`**: Multi-format export
+- **`app.py`**: FastAPI REST endpoints
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Python 3.9+, FastAPI, Uvicorn |
+| **Frontend** | React 19, Material-UI (MUI) |
+| **AI** | Google Gemini 2.5 Flash |
+| **ALM Integration** | Jira API, Azure DevOps API, Polarion API |
+| **File Processing** | PyPDF, python-docx, XML parser |
+| **Deployment** | Docker-ready, Cloud-compatible |
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.9 or higher
+- Node.js 16+ and npm
+- Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
+
+### Step 1: Clone the Repository
+```bash
+git clone <repository-url>
+cd ai-testcase-generator
+```
+
+### Step 2: Backend Setup
   ```bash
+# Install dependencies
   pip install -r requirements.txt
-  ```
 
-- **Install Frontend Dependencies**: In the same terminal, navigate to the frontend folder (`cd frontend`) and run:
+# Configure environment variables
+# Create .env file in root directory
+```
+
+**.env file**:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Optional - ALM credentials (can be configured via UI)
+JIRA_SERVER=https://your-domain.atlassian.net
+JIRA_USER=your-email@example.com
+JIRA_API_TOKEN=your_jira_token
+JIRA_PROJECT_KEY=PROJ
+
+AZURE_DEVOPS_ORGANIZATION=myorg
+AZURE_DEVOPS_PAT=your_pat
+AZURE_DEVOPS_PROJECT=TestProject
+
+POLARION_URL=https://polarion.example.com/polarion
+POLARION_USER=username
+POLARION_PASSWORD=password
+POLARION_PROJECT_ID=HEALTHCARE
+```
+
+### Step 3: Frontend Setup
   ```bash
+cd frontend
   npm install
   ```
 
-### 2. Running the Application
+### Step 4: Run the Application
 
-You need **two terminals** running simultaneously.
+**Terminal 1 - Backend**:
+```bash
+python app.py
+# Server runs on http://localhost:5000
+```
 
-- **Terminal 1 (Backend)**:
-  - Navigate to the `ai-testcase-generator` folder.
-  - Run the command: `python app.py`
-  - Leave this running. It will serve the API at `http://localhost:5000`.
+**Terminal 2 - Frontend**:
+```bash
+cd frontend
+npm start
+# Opens http://localhost:3000
+```
 
-- **Terminal 2 (Frontend)**:
-  - Navigate to the `ai-testcase-generator/frontend` folder.
-  - Run the command: `npm start`
-  - This will automatically open the web application in your browser at `http://localhost:3000`.
-
-### 3. Loading the Chrome Extension
-
-- Open Google Chrome and navigate to `chrome://extensions`.
-- Turn on **"Developer mode"** in the top-right corner.
-- Click **"Load unpacked"** and select the entire `ai-testcase-generator/chrome-extension` folder.
-- The extension will now be active.
+### Step 5: Chrome Extension (Optional)
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable "Developer mode"
+3. Click "Load unpacked"
+4. Select the `chrome-extension` folder
 
 ---
 
-## How to Use
+## 💡 Usage
 
 ### Web Application
 
-1.  **Generate Tests**: Select a domain, then either **upload a requirement document** or **type the requirement** into the text box, and click "Generate Test Cases".
-2.  **Create Jira Tickets**: 
-    - To use the default credentials from your `.env` file, simply click "Create in Jira".
-    - To use custom credentials, click the **Settings icon (⚙️)**, enter the details for another Jira instance, click "Save", and then click "Create in Jira".
+#### Generate Test Cases
+1. Open `http://localhost:3000`
+2. Select domain (e.g., "Healthcare")
+3. Upload requirement file OR enter text
+4. Click "Generate Test Cases"
+5. Review generated test cases with compliance status
+
+#### Configure ALM Integration
+1. Click the Settings icon (⚙️)
+2. Select platform (Jira/Azure DevOps/Polarion)
+3. Enter credentials
+4. Click "Save"
+5. Click "Create in [Platform]" to sync test cases
+
+#### Review Compliance
+- Each test case shows:
+  - **Compliance Status**: Compliant/Non-Compliant
+  - **Risk Score**: 1-10 (with color coding)
+  - **Compliance Tags**: FDA, HIPAA, GDPR, etc.
+  - **Detailed Reasoning**: Why it's compliant or not
+
+#### Enable Advanced Features
+```bash
+# Generate with context and gap analysis
+POST /api/generate-from-text
+{
+  "requirement_text": "...",
+  "domain": "Healthcare",
+  "create_context": true,
+  "analyze_gaps": true
+}
+```
 
 ### Chrome Extension
+1. Ensure backend is running
+2. Highlight text on any webpage
+3. Right-click → "Generate AI Test Cases"
+4. View generated test cases in new tab
 
-1.  Ensure the backend server is running.
-2.  Go to any webpage and highlight a block of text.
-3.  **Right-click** the highlighted text and select "Generate AI Test Cases for Selected Text".
-4.  A new tab will open with the generated test cases.
-
----
-
-## Future Roadmap
-
-- **AI-Powered Refinement**: Add a feature to allow users to give feedback to the AI (e.g., "make this test more security-focused") to regenerate and improve a specific test case.
-- **Support for More ALM Tools**: Expand the API integration to support other platforms like Azure DevOps and Polarion.
-- **Advanced Analytics**: Create a dashboard to track metrics like the number of test cases generated, compliance coverage, and integration success rates.
-
-
-
-<!-- # AI-Powered Test Case Generator
-
-A sophisticated, AI-powered system that automatically converts software requirements from multiple formats into compliant, traceable test cases and seamlessly integrates with enterprise toolchains like Jira.
+### CLI Usage
+```bash
+python src/main.py -i requirements.txt -o output.feature --domain "Healthcare" --jira
+```
 
 ---
 
-## The Challenge
+## 📡 API Reference
 
-In highly regulated industries like healthcare and finance, QA teams spend enormous time manually converting complex requirement documents into test cases, ensuring compliance, and maintaining traceability. This project was built to solve that problem by automating the most tedious parts of the QA lifecycle.
+### Health Check
+```bash
+GET /api/health
+```
 
-## Key Features
+**Response**:
+```json
+{
+  "status": "healthy",
+  "version": "2.0.0",
+  "features": ["Test case generation", "Jira integration", ...]
+}
+```
 
-This isn't just a simple script; it's a feature-rich platform built with a modern, scalable architecture.
+### Generate Test Cases
+```bash
+POST /api/generate-from-text
+Content-Type: application/json
 
-- **Multi-Format Requirement Ingestion**: Handles requirements from various document formats, including **PDF, DOCX, XML, and TXT**.
-- **Domain-Agnostic AI**: The AI's expertise can be dynamically configured via the UI to generate relevant test cases for any domain (e.g., Healthcare, Finance, E-commerce).
-- **True Jira Integration**: Go beyond simple exports. Create test cases as actual tickets in any Jira project directly via the API.
-- **Dynamic, User-Specific Configuration**: A user-friendly settings panel allows users to connect their own Jira instance. The system intelligently falls back to default `.env` credentials if none are provided.
-- **Asynchronous & Scalable Backend**: Built with **FastAPI**, the backend is asynchronous and can handle multiple concurrent requests without blocking, making it highly performant and scalable.
-- **Modern & Responsive Frontend**: The user interface is a professional-grade **React + MUI** single-page application (SPA), offering a smooth user experience.
-- **Browser Extension for In-Context Generation**: A fully functional **Chrome Extension** allows users to generate test cases from highlighted text on *any* webpage, seamlessly integrating the tool into their existing workflows.
+{
+  "requirement_text": "Patient portal login system",
+  "domain": "Healthcare",
+  "create_context": true,
+  "analyze_gaps": true,
+  "include_traceability": false
+}
+```
 
-## Architecture
+### Export Test Cases
+```bash
+POST /api/export
+Content-Type: application/json
 
-The project uses a modern, decoupled architecture:
+{
+  "test_cases": [...],
+  "format": "xml",
+  "output_path": "export.xml"
+}
+```
 
-- **Backend**: A powerful and scalable API server built with Python and FastAPI.
-- **Frontend**: A dynamic and responsive user interface built with React and Material-UI (MUI).
-- **Core Logic Module**: A centralized, shared module contains all the business logic for AI interaction, file processing, and Jira integration, ensuring the codebase is clean, professional, and easy to maintain (DRY principle).
+### Submit Feedback
+```bash
+POST /api/feedback
+Content-Type: application/json
 
-## Tech Stack
+{
+  "context_id": "ctx_abc123",
+  "feedback": {
+    "rating": 5,
+    "comments": "Tests are comprehensive"
+  }
+```
 
-- **Backend**: Python, FastAPI, Uvicorn
-- **Frontend**: React, Material-UI (MUI), Axios
-- **Core AI**: Google Gemini
-- **Integrations**: Jira API
+### ALM Integration
+```bash
+POST /api/jira | /api/azure-devops | /api/polarion
+Content-Type: application/json
+
+{
+  "test_cases": [...],
+  "credentials": {...}
+}
+```
+
+**Full API Documentation**: `http://localhost:5000/docs`
 
 ---
 
-## Local Setup and Running the Project
+## 🏥 Healthcare Compliance
 
-Follow these steps to run the complete application on your local machine.
+### Supported Standards
 
-### 1. One-Time Setup
+| Standard | Coverage | Implementation |
+|----------|----------|----------------|
+| **FDA 21 CFR 820** | Medical device regulations | Compliance tags, audit trails |
+| **IEC 62304** | Medical device software | Traceability matrix |
+| **ISO 13485** | Quality management | Test case validation |
+| **HIPAA** | PHI protection | Data privacy checks |
+| **GDPR** | Data protection | Consent, erasure, access rights |
+| **ISO 27001** | Security | Risk assessment |
 
-- **Configure Credentials**: In the root `hackathon-project` folder, create or edit the `.env` file. It must contain your credentials:
-  ```
-  GEMINI_API_KEY=your_gemini_key_here
-  JIRA_SERVER=https://your-domain.atlassian.net
-  JIRA_USER=your-jira-email@example.com
-  JIRA_API_TOKEN=your_jira_api_token_here
-  JIRA_PROJECT_KEY=PROJ # Your default Jira Project Key
-  ```
+### Compliance Features
+- ✅ **Automated Auditing**: AI validates compliance automatically
+- ✅ **Risk Scoring**: 1-10 priority based on compliance impact
+- ✅ **Traceability**: Requirements → Test Cases mapping
+- ✅ **GDPR Validation**: Data protection checks built-in
+- ✅ **Audit-Ready**: Complete documentation for regulatory audits
 
-- **Install Backend Dependencies**: Open a terminal in the `hackathon-project` folder and run:
+---
+
+## 🔌 Integration Guide
+
+### CI/CD Integration
+```yaml
+# .github/workflows/test-generation.yml
+- name: Generate Test Cases
+  run: |
+    curl -X POST $API_URL/api/generate-from-text \
+      -H "Content-Type: application/json" \
+      -d '{"requirement_text": "${{ github.event.head_commit.message }}", 
+           "domain": "Healthcare",
+           "create_context": true,
+           "analyze_gaps": true}'
+
+- name: Create Jira Tickets
+  run: |
+    curl -X POST $API_URL/api/jira \
+      -d @test_cases.json
+```
+
+### Webhook Integration
+```python
+# Send results to external system
+@app.post("/webhook")
+async def send_to_external_system(webhook_url: str, data: dict):
+    async with aiohttp.ClientSession() as session:
+        await session.post(webhook_url, json=data)
+```
+
+### Custom ALM Integration
+```python
+# Add your custom ALM platform
+@app.post("/api/custom-alm")
+async def custom_alm(request: CustomALMRequest):
+    # Your integration logic
+    pass
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Issue: "404 models/gemini-1.5-flash not found"
+**Solution**: The model has been updated to `gemini-2.5-flash`. Clear cache and restart:
+```bash
+rm -rf __pycache__ core/__pycache__
+python app.py
+```
+
+### Issue: Frontend hitting deployed URL instead of localhost
+**Solution**: The frontend is configured for localhost. Verify `frontend/src/App.js`:
+```javascript
+const API_BASE_URL = 'http://localhost:5000';
+```
+
+### Issue: CORS errors
+**Solution**: Backend already configured for CORS. If issues persist, check:
+- Backend is running on port 5000
+- Frontend is running on port 3000
+- No firewall blocking connections
+
+### Issue: "ModuleNotFoundError"
+**Solution**: Install dependencies:
   ```bash
   pip install -r requirements.txt
-  ```
+cd frontend && npm install
+```
 
-- **Install Frontend Dependencies**: In the same terminal, navigate to the frontend folder (`cd frontend`) and run:
-  ```bash
-  npm install
-  ```
-
-### 2. Running the Application
-
-You need **two terminals** running simultaneously.
-
-- **Terminal 1 (Backend)**:
-  - Navigate to the `hackathon-project` folder.
-  - Run the command: `python app.py`
-  - Leave this running. It will serve the API at `https://ai-testcase-generator-583h.onrender.com`.
-
-- **Terminal 2 (Frontend)**:
-  - Navigate to the `hackathon-project/frontend` folder.
-  - Run the command: `npm start`
-  - This will automatically open the web application in your browser at `https://ai-testcase-generator-umber.vercel.app/`.
-
-### 3. Loading the Chrome Extension
-
-- Open Google Chrome and navigate to `chrome://extensions`.
-- Turn on **"Developer mode"** in the top-right corner.
-- Click **"Load unpacked"** and select the entire `hackathon-project/chrome-extension` folder.
-- The extension will now be active.
+### Issue: ALM integration failing
+**Solution**: 
+1. Verify credentials in Settings (⚙️)
+2. Test connection with health endpoint
+3. Check network connectivity to ALM platform
 
 ---
 
-## How to Use
+## 🚀 Deployment
 
-### Web Application
+### Docker
+```dockerfile
+FROM python:3.9
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+```
 
-1.  **Generate Tests**: Select a domain, upload a requirement document, and click "Generate Test Cases".
-2.  **Create Jira Tickets**:
-    - To use the default credentials from your `.env` file, simply click "Create in Jira".
-    - To use custom credentials, click the **Settings icon (⚙️)**, enter the details for another Jira instance, click "Save", and then click "Create in Jira".
+### Cloud Deployment
+- **GCP**: Vertex AI integration ready
+- **AWS**: EC2, Lambda compatible
+- **Azure**: Azure Functions ready
 
-### Chrome Extension
-
-1.  Ensure the backend server is running.
-2.  Go to any webpage and highlight a block of text.
-3.  **Right-click** the highlighted text and select "Generate AI Test Cases for Selected Text".
-4.  A new tab will open with the generated test cases.
+### Environment Variables
+Set these in your deployment platform:
+```env
+GEMINI_API_KEY=...
+JIRA_SERVER=...
+JIRA_USER=...
+# etc.
+```
 
 ---
 
-## Future Roadmap
+## 📈 Roadmap
 
-- **AI-Powered Refinement**: Add a feature to allow users to give feedback to the AI (e.g., "make this test more security-focused") to regenerate and improve a specific test case.
-- **Support for More ALM Tools**: Expand the API integration to support other platforms like Azure DevOps and Polarion.
-- **Advanced Analytics**: Create a dashboard to track metrics like the number of test cases generated, compliance coverage, and integration success rates. -->
+- [ ] BigQuery integration for analytics dashboard
+- [ ] Firebase for data persistence
+- [ ] Vector database for semantic context retrieval
+- [ ] Support for more ALM platforms (ServiceNow, Rally)
+- [ ] Automated compliance reporting
+- [ ] Machine learning model fine-tuning
+- [ ] PDF export for formal reports
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 📧 Contact
+
+For questions or support, please open an issue in the repository.
+
+---
+
+**Built for Google AI Hackathon - Healthcare Challenge** 🏥🤖
