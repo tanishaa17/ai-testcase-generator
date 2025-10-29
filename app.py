@@ -16,8 +16,10 @@ from core.logic import (
     create_jira_issues,
     configure_azure_devops,
     create_azure_devops_work_items,
-    configure_polarion,
-    create_polarion_test_cases,
+    configure_github,
+    create_github_issues,
+    configure_gitlab,
+    create_gitlab_issues,
     generate_traceability_matrix
 )
 from core.context_manager import get_context_manager
@@ -37,10 +39,14 @@ class AzureDevOpsCredentials(BaseModel):
     personal_access_token: Optional[str] = Field(None, alias='pat')
     project: Optional[str] = None
 
-class PolarionCredentials(BaseModel):
+class GitHubCredentials(BaseModel):
+    token: Optional[str] = None
+    owner: Optional[str] = None
+    repo: Optional[str] = None
+
+class GitLabCredentials(BaseModel):
     url: Optional[str] = None
-    user: Optional[str] = None
-    password: Optional[str] = None
+    token: Optional[str] = None
     project_id: Optional[str] = Field(None, alias='projectId')
 
 class JiraRequest(BaseModel):
@@ -51,9 +57,13 @@ class AzureDevOpsRequest(BaseModel):
     test_cases: List[Dict[str, Any]]
     credentials: AzureDevOpsCredentials
 
-class PolarionRequest(BaseModel):
+class GitHubRequest(BaseModel):
     test_cases: List[Dict[str, Any]]
-    credentials: PolarionCredentials
+    credentials: GitHubCredentials
+
+class GitLabRequest(BaseModel):
+    test_cases: List[Dict[str, Any]]
+    credentials: GitLabCredentials
 
 class FeedbackRequest(BaseModel):
     context_id: str
@@ -75,7 +85,7 @@ class TextGenerationRequest(BaseModel):
 
 app = FastAPI(
     title="AI Test Case Generator API",
-    description="An API to generate test cases from requirement documents with multi-platform ALM integration (Jira, Azure DevOps, Polarion).",
+    description="An API to generate test cases from requirement documents with multi-platform ALM integration (Jira, Azure DevOps, GitHub, GitLab).",
     version="1.0.0"
 )
 
@@ -191,20 +201,52 @@ async def azure_devops_api(request_data: AzureDevOpsRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/polarion")
-async def polarion_api(request_data: PolarionRequest):
+@app.post("/api/github")
+async def github_api(request_data: GitHubRequest):
     """
-    Receives test case data and optional credentials, then creates test cases in Polarion.
+    Receives test case data and optional credentials, then creates issues in GitHub.
     """
     try:
         creds = request_data.credentials
-        gherkin_texts = [tc['gherkin_feature'] for tc in request_data.test_cases]
-        full_gherkin_output = "\n\n".join(gherkin_texts)
-        if not full_gherkin_output.strip():
-            raise HTTPException(status_code=400, detail="No Gherkin content found to create test cases from")
-        polarion_config = configure_polarion(url=creds.url, user=creds.user, password=creds.password)
-        created_items = create_polarion_test_cases(polarion_config, full_gherkin_output, project_id=creds.project_id)
-        return {"message": "Polarion test cases created successfully", "items": created_items}
+        if not request_data.test_cases:
+            raise HTTPException(status_code=400, detail="No test cases provided")
+        github_config = configure_github(token=creds.token)
+        created_items = create_github_issues(
+            github_config, 
+            request_data.test_cases, 
+            owner=creds.owner, 
+            repo=creds.repo
+        )
+        
+        if len(created_items) == 0:
+            return {
+                "message": "No issues were created due to errors. Check server logs for details.",
+                "issues": [],
+                "error": "All issue creations failed. Likely token permission issue. See troubleshooting guide."
+            }
+        
+        return {"message": "GitHub issues created successfully", "issues": created_items}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/gitlab")
+async def gitlab_api(request_data: GitLabRequest):
+    """
+    Receives test case data and optional credentials, then creates issues in GitLab.
+    """
+    try:
+        creds = request_data.credentials
+        if not request_data.test_cases:
+            raise HTTPException(status_code=400, detail="No test cases provided")
+        gitlab_config = configure_gitlab(url=creds.url, token=creds.token)
+        created_items = create_gitlab_issues(
+            gitlab_config, 
+            request_data.test_cases, 
+            project_id=creds.project_id
+        )
+        return {"message": "GitLab issues created successfully", "issues": created_items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -219,7 +261,8 @@ async def health_check():
             "Test case generation",
             "Jira integration",
             "Azure DevOps integration",
-            "Polarion integration",
+            "GitHub Issues integration",
+            "GitLab Issues integration",
             "GDPR compliance",
             "Traceability matrix",
             "Context management",

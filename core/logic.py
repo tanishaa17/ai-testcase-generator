@@ -112,70 +112,161 @@ def create_azure_devops_work_items(connection, gherkin_text, project=None):
     
     return created_items
 
-# --- Polarion Configuration ---
+# --- GitHub Issues Configuration ---
 
-def configure_polarion(url=None, user=None, password=None):
-    """Connects to Polarion using provided credentials."""
-    final_url = url or os.environ.get("POLARION_URL")
-    final_user = user or os.environ.get("POLARION_USER")
-    final_password = password or os.environ.get("POLARION_PASSWORD")
+def configure_github(token=None):
+    """Configures GitHub API authentication."""
+    final_token = token or os.environ.get("GITHUB_TOKEN")
+    if not final_token:
+        raise ValueError("GitHub token is not configured or provided.")
+    return {"token": final_token}
 
-    if not all([final_url, final_user, final_password]):
-        raise ValueError("Polarion credentials are not fully configured or provided.")
-
-    try:
-        # Basic authentication token
-        credentials = f"{final_user}:{final_password}"
-        token = base64.b64encode(credentials.encode()).decode()
-        return {"url": final_url, "token": token, "user": final_user}
-    except Exception as e:
-        raise Exception(f"Polarion connection failed: {e}")
-
-def create_polarion_test_cases(polarion_config, gherkin_text, project_id=None):
-    """Creates test cases in Polarion from Gherkin scenarios."""
-    final_project = project_id or os.environ.get("POLARION_PROJECT_ID")
-    if not final_project:
-        raise ValueError("Polarion project ID is not configured.")
-
-    scenarios = re.split(r'(?=Scenario:|Scenario Outline:)', gherkin_text)
-    if len(scenarios) < 2:
-        print("No scenarios found in the generated text. Skipping Polarion creation.")
-        return []
-
-    feature_header = scenarios[0]
-    created_items = []
-    headers = {"Authorization": f"Basic {polarion_config['token']}"}
-    base_url = polarion_config['url']
+def create_github_issues(github_config, test_cases, owner=None, repo=None):
+    """Creates GitHub issues from test cases."""
+    final_owner = owner or os.environ.get("GITHUB_OWNER")
+    final_repo = repo or os.environ.get("GITHUB_REPO")
     
-    for scenario_text in scenarios[1:]:
+    if not all([final_owner, final_repo]):
+        raise ValueError("GitHub owner and repo are not configured or provided.")
+    
+    headers = {
+        "Authorization": f"Bearer {github_config['token']}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    base_url = "https://api.github.com"
+    created_issues = []
+    
+    for tc in test_cases:
         try:
-            title = scenario_text.splitlines()[0].strip()
-            content = f"<pre>{feature_header}\n{scenario_text}</pre>"
+            title = f"Test Case: {tc.get('test_id', 'TC')}"
+            body = f"""## Test Case: {tc.get('test_id')}
+
+**Requirement Source**: {tc.get('requirement_source', '')}
+
+### Gherkin Feature
+```gherkin
+{tc.get('gherkin_feature', '')}
+```
+
+### Compliance
+**Status**: {tc.get('compliance_assessment', {}).get('status', 'Unknown')}
+**Risk Score**: {tc.get('risk_and_priority', {}).get('score', 0)}/10
+
+### Compliance Tags
+{', '.join(tc.get('compliance_tags', []))}
+"""
             
-            # Create test case using Polarion REST API
-            test_case_data = {
-                "project": final_project,
-                "workitemtype": "testcase",
+            issue_data = {
                 "title": title,
-                "description": content
+                "body": body,
+                "labels": ["test-case", "generated"] + tc.get('compliance_tags', [])
             }
             
             response = requests.post(
-                f"{base_url}/ws/WorkItemService/createWorkItem",
-                json=test_case_data,
+                f"{base_url}/repos/{final_owner}/{final_repo}/issues",
+                json=issue_data,
                 headers=headers
             )
             
-            if response.status_code == 200:
-                created_items.append(title)
-                print(f"Successfully created Polarion test case: '{title}'")
+            if response.status_code == 201:
+                issue = response.json()
+                created_issues.append(issue['number'])
+                print(f"Successfully created GitHub issue: #{issue['number']} - '{title}'")
+            elif response.status_code == 401:
+                error_msg = response.json().get('message', 'Bad credentials')
+                raise Exception(f"GitHub authentication failed: {error_msg}. Please check your token at https://github.com/settings/tokens")
+            elif response.status_code == 403:
+                error_msg = response.json().get('message', 'Access denied')
+                raise Exception(f"GitHub access denied: {error_msg}. Token needs 'repo' scope. Update token at https://github.com/settings/tokens")
+            elif response.status_code == 404:
+                raise Exception(f"Repository not found: {final_owner}/{final_repo}. Check owner and repo name are correct.")
             else:
-                print(f"Failed to create Polarion test case: '{title}'. Error: {response.text}")
+                error_text = response.text[:200]
+                print(f"Failed to create GitHub issue: '{title}'. Error: {error_text}")
                 
         except Exception as e:
-            print(f"Failed to create Polarion test case: '{title}'. Error: {e}")
+            # Re-raise critical errors
+            if "authentication" in str(e).lower() or "access denied" in str(e).lower() or "not found" in str(e).lower():
+                raise
+            print(f"Failed to create GitHub issue: '{title}'. Error: {e}")
     
-    return created_items
+    if len(created_issues) == 0 and len(test_cases) > 0:
+        raise Exception("No issues were created. Please check your GitHub token permissions and repository access.")
+    
+    return created_issues
+
+# --- GitLab Issues Configuration ---
+
+def configure_gitlab(url=None, token=None):
+    """Configures GitLab API authentication."""
+    final_url = url or os.environ.get("GITLAB_URL", "https://gitlab.com")
+    final_token = token or os.environ.get("GITLAB_TOKEN")
+    
+    if not final_token:
+        raise ValueError("GitLab token is not configured or provided.")
+    
+    return {"url": final_url.rstrip('/'), "token": final_token}
+
+def create_gitlab_issues(gitlab_config, test_cases, project_id=None):
+    """Creates GitLab issues from test cases."""
+    final_project_id = project_id or os.environ.get("GITLAB_PROJECT_ID")
+    
+    if not final_project_id:
+        raise ValueError("GitLab project ID is not configured or provided.")
+    
+    headers = {
+        "PRIVATE-TOKEN": gitlab_config['token'],
+        "Content-Type": "application/json"
+    }
+    base_url = gitlab_config['url']
+    created_issues = []
+    
+    for tc in test_cases:
+        try:
+            title = f"Test Case: {tc.get('test_id', 'TC')}"
+            description = f"""## Test Case: {tc.get('test_id')}
+
+**Requirement Source**: {tc.get('requirement_source', '')}
+
+### Gherkin Feature
+
+```gherkin
+{tc.get('gherkin_feature', '')}
+```
+
+### Compliance
+**Status**: {tc.get('compliance_assessment', {}).get('status', 'Unknown')}
+**Risk Score**: {tc.get('risk_and_priority', {}).get('score', 0)}/10
+
+### Compliance Tags
+{', '.join(tc.get('compliance_tags', []))}
+"""
+            
+            labels = ["test-case", "generated"] + tc.get('compliance_tags', [])
+            
+            issue_data = {
+                "title": title,
+                "description": description,
+                "labels": ",".join(labels)
+            }
+            
+            response = requests.post(
+                f"{base_url}/api/v4/projects/{final_project_id}/issues",
+                json=issue_data,
+                headers=headers
+            )
+            
+            if response.status_code == 201:
+                issue = response.json()
+                created_issues.append(issue['iid'])
+                print(f"Successfully created GitLab issue: !{issue['iid']} - '{title}'")
+            else:
+                print(f"Failed to create GitLab issue: '{title}'. Error: {response.text}")
+                
+        except Exception as e:
+            print(f"Failed to create GitLab issue: '{title}'. Error: {e}")
+    
+    return created_issues
 
 # --- File Processing ---
 

@@ -11,8 +11,10 @@ from .logic import (
     create_jira_issues,
     configure_azure_devops,
     create_azure_devops_work_items,
-    configure_polarion,
-    create_polarion_test_cases,
+    configure_github,
+    create_github_issues,
+    configure_gitlab,
+    create_gitlab_issues,
     generate_traceability_matrix
 )
 
