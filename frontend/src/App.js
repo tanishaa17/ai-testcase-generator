@@ -69,7 +69,8 @@ function App() {
 
   const [jiraSettings, setJiraSettings] = useState({ server: '', user: '', apiToken: '', projectKey: '' });
   const [azureSettings, setAzureSettings] = useState({ organization: '', pat: '', project: '' });
-  const [polarionSettings, setPolarionSettings] = useState({ url: '', user: '', password: '', projectId: '' });
+  const [githubSettings, setGithubSettings] = useState({ token: '', owner: '', repo: '' });
+  const [gitlabSettings, setGitlabSettings] = useState({ url: 'https://gitlab.com', token: '', projectId: '' });
 
   const [isSettingsValid, setIsSettingsValid] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -83,9 +84,13 @@ function App() {
     if (savedAzureSettings) {
       setAzureSettings(JSON.parse(savedAzureSettings));
     }
-    const savedPolarionSettings = localStorage.getItem('polarionSettings');
-    if (savedPolarionSettings) {
-      setPolarionSettings(JSON.parse(savedPolarionSettings));
+    const savedGithubSettings = localStorage.getItem('githubSettings');
+    if (savedGithubSettings) {
+      setGithubSettings(JSON.parse(savedGithubSettings));
+    }
+    const savedGitlabSettings = localStorage.getItem('gitlabSettings');
+    if (savedGitlabSettings) {
+      setGitlabSettings(JSON.parse(savedGitlabSettings));
     }
   }, []);
 
@@ -97,12 +102,15 @@ function App() {
     } else if (selectedPlatform === 'Azure DevOps') {
       const { organization, pat, project } = azureSettings;
       valid = organization.trim() && pat.trim() && project.trim();
-    } else if (selectedPlatform === 'Polarion') {
-      const { url, user, password, projectId } = polarionSettings;
-      valid = url.trim() && user.trim() && password.trim() && projectId.trim();
+    } else if (selectedPlatform === 'GitHub') {
+      const { token, owner, repo } = githubSettings;
+      valid = token.trim() && owner.trim() && repo.trim();
+    } else if (selectedPlatform === 'GitLab') {
+      const { url, token, projectId } = gitlabSettings;
+      valid = url.trim() && token.trim() && projectId.trim();
     }
     setIsSettingsValid(valid);
-  }, [jiraSettings, azureSettings, polarionSettings, selectedPlatform]);
+  }, [jiraSettings, azureSettings, githubSettings, gitlabSettings, selectedPlatform]);
 
   const handleSettingsChange = (e, settingsType) => {
     const { name, value } = e.target;
@@ -110,15 +118,18 @@ function App() {
       setJiraSettings(prev => ({ ...prev, [name]: value }));
     } else if (settingsType === 'azure') {
       setAzureSettings(prev => ({ ...prev, [name]: value }));
-    } else if (settingsType === 'polarion') {
-      setPolarionSettings(prev => ({ ...prev, [name]: value }));
+    } else if (settingsType === 'github') {
+      setGithubSettings(prev => ({ ...prev, [name]: value }));
+    } else if (settingsType === 'gitlab') {
+      setGitlabSettings(prev => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSaveSettings = () => {
     localStorage.setItem('jiraSettings', JSON.stringify(jiraSettings));
     localStorage.setItem('azureSettings', JSON.stringify(azureSettings));
-    localStorage.setItem('polarionSettings', JSON.stringify(polarionSettings));
+    localStorage.setItem('githubSettings', JSON.stringify(githubSettings));
+    localStorage.setItem('gitlabSettings', JSON.stringify(gitlabSettings));
     setSettingsOpen(false);
   };
 
@@ -185,10 +196,14 @@ function App() {
         const payload = { test_cases: testData.test_cases, credentials: azureSettings };
         response = await axios.post(`${API_BASE_URL}/api/azure-devops`, payload);
         setIntegrationSuccess(`${response.data.message} - Work Items: ${response.data.items.join(', ')}`);
-      } else if (selectedPlatform === 'Polarion') {
-        const payload = { test_cases: testData.test_cases, credentials: polarionSettings };
-        response = await axios.post(`${API_BASE_URL}/api/polarion`, payload);
-        setIntegrationSuccess(`${response.data.message} - Test Cases: ${response.data.items.join(', ')}`);
+      } else if (selectedPlatform === 'GitHub') {
+        const payload = { test_cases: testData.test_cases, credentials: githubSettings };
+        response = await axios.post(`${API_BASE_URL}/api/github`, payload);
+        setIntegrationSuccess(`${response.data.message} - Issues: #${response.data.issues.join(', #')}`);
+      } else if (selectedPlatform === 'GitLab') {
+        const payload = { test_cases: testData.test_cases, credentials: gitlabSettings };
+        response = await axios.post(`${API_BASE_URL}/api/gitlab`, payload);
+        setIntegrationSuccess(`${response.data.message} - Issues: !${response.data.issues.join(', !')}`);
       }
     } catch (err) {
       setIntegrationError(err.response?.data?.detail || 'An unexpected error occurred during integration.');
@@ -206,7 +221,7 @@ function App() {
             Gen-AI Test Case Auditor
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            AI-Powered Test Case Generation with Enterprise ALM Integration (Jira, Azure DevOps, Polarion)
+            AI-Powered Test Case Generation with Enterprise ALM Integration (Jira, Azure DevOps, GitHub, GitLab)
           </Typography>
           <Tooltip title="Integration Settings">
             <IconButton onClick={() => setSettingsOpen(true)} sx={{ position: 'absolute', top: 8, right: 8 }}>
@@ -232,7 +247,8 @@ function App() {
               <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
                 <MenuItem value="Jira">Jira</MenuItem>
                 <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
-                <MenuItem value="Polarion">Polarion</MenuItem>
+                <MenuItem value="GitHub">GitHub Issues</MenuItem>
+                <MenuItem value="GitLab">GitLab Issues</MenuItem>
               </Select>
             </FormControl>
 
@@ -253,12 +269,19 @@ function App() {
               </>
             )}
 
-            {selectedPlatform === 'Polarion' && (
+            {selectedPlatform === 'GitHub' && (
               <>
-                <TextField name="url" label="Polarion URL" value={polarionSettings.url} onChange={(e) => handleSettingsChange(e, 'polarion')} fullWidth margin="normal" placeholder="https://polarion.example.com/polarion" />
-                <TextField name="user" label="Username" value={polarionSettings.user} onChange={(e) => handleSettingsChange(e, 'polarion')} fullWidth margin="normal" />
-                <TextField name="password" label="Password" value={polarionSettings.password} onChange={(e) => handleSettingsChange(e, 'polarion')} fullWidth margin="normal" type="password" />
-                <TextField name="projectId" label="Project ID" value={polarionSettings.projectId} onChange={(e) => handleSettingsChange(e, 'polarion')} fullWidth margin="normal" />
+                <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" type="password" helperText="Create token at: https://github.com/settings/tokens" />
+                <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="your-username" />
+                <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="test-cases" />
+              </>
+            )}
+
+            {selectedPlatform === 'GitLab' && (
+              <>
+                <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
+                <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
+                <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="12345678" helperText="Found in project Settings > General" />
               </>
             )}
           </DialogContent>
@@ -311,7 +334,8 @@ function App() {
                       <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
                         <MenuItem value="Jira">Jira</MenuItem>
                         <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
-                        <MenuItem value="Polarion">Polarion</MenuItem>
+                        <MenuItem value="GitHub">GitHub Issues</MenuItem>
+                        <MenuItem value="GitLab">GitLab Issues</MenuItem>
                       </Select>
                     </FormControl>
                     <Button variant="contained" color="secondary" startIcon={<ConfirmationNumber />} onClick={handleIntegrationSubmit} disabled={integrationLoading}>
