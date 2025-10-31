@@ -31,9 +31,10 @@ import {
 } from '@mui/material';
 import { UploadFile, ArrowForward, ConfirmationNumber, Settings, Upload, Dashboard, Add, ArrowUpward, Edit } from '@mui/icons-material';
 
-// API Base URL - Change this for local development
-const API_BASE_URL = 'http://localhost:5000';
-// For deployed version: const API_BASE_URL = 'https://ai-testcase-generator-583h.onrender.com';
+// API Base URL - Uses environment variable with fallback to production URL
+// For local development: Create a .env.local file with REACT_APP_API_BASE_URL=http://localhost:5000
+// For production: Uses the deployed backend URL by default
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ai-testcase-generator-583h.onrender.com';
 
 const theme = createTheme({
   palette: {
