@@ -29,7 +29,7 @@ import {
   Tabs,
   Tab
 } from '@mui/material';
-import { UploadFile, ArrowForward, ConfirmationNumber, Settings, Upload, Dashboard } from '@mui/icons-material';
+import { UploadFile, ArrowForward, ConfirmationNumber, Settings, Upload, Dashboard, Add, ArrowUpward, Edit } from '@mui/icons-material';
 
 // API Base URL - Change this for local development
 const API_BASE_URL = 'http://localhost:5000';
@@ -37,19 +37,171 @@ const API_BASE_URL = 'http://localhost:5000';
 
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2',
+      main: '#32CD32',
     },
     secondary: {
       main: '#1a9c6b',
     },
     background: {
-      default: '#f4f6f8',
+      default: '#1A1A1A',
+      paper: '#1A1A1A',
+    },
+    text: {
+      primary: '#FFFFFF',
+      secondary: '#AAAAAA',
     },
   },
   typography: {
     h4: {
       fontWeight: 600,
+      color: '#FFFFFF',
+    },
+    body1: {
+      color: '#FFFFFF',
+    },
+    body2: {
+      color: '#AAAAAA',
+    },
+  },
+  components: {
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#1A1A1A',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: '#2C2C2C',
+            color: '#FFFFFF',
+            '& fieldset': {
+              borderColor: '#2C2C2C',
+            },
+            '&:hover fieldset': {
+              borderColor: '#2C2C2C',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#2C2C2C',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: '#AAAAAA',
+          },
+          '& .MuiInputBase-input::placeholder': {
+            color: '#AAAAAA',
+            opacity: 1,
+            fontStyle: 'italic',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#1A1A1A',
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          borderBottom: 'none',
+        },
+        indicator: {
+          backgroundColor: '#FFFFFF',
+          height: 2,
+        },
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          color: '#AAAAAA',
+          '&.Mui-selected': {
+            color: '#FFFFFF',
+          },
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+          '&:hover': {
+            backgroundColor: '#3C3C3C',
+          },
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputLabel-root': {
+            color: '#AAAAAA',
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: '#AAAAAA',
+          '&.Mui-focused': {
+            color: '#AAAAAA',
+          },
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+        },
+      },
     },
   },
 });
@@ -215,25 +367,88 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="lg" sx={{ my: 4 }}>
-        <Box sx={{ textAlign: 'center', mb: 5, p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1, position: 'relative' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Gen-AI Test Case Auditor
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            AI-Powered Test Case Generation with Enterprise ALM Integration (Jira, Azure DevOps, GitHub, GitLab)
-          </Typography>
-          <Tooltip title="Integration Settings">
-            <IconButton onClick={() => setSettingsOpen(true)} sx={{ position: 'absolute', top: 8, right: 8 }}>
-              <Settings />
-            </IconButton>
-          </Tooltip>
-        </Box>
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#1A1A1A', py: 4 }}>
+        <Container maxWidth="lg">
+          {/* Header Section */}
+          <Box sx={{ textAlign: 'center', mb: 5 }}>
+            {/* Domain Tag - Editable */}
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                borderRadius: '4px',
+                px: 2,
+                py: 0.5,
+                mb: 2,
+                cursor: 'pointer',
+                position: 'relative',
+              }}
+              onClick={() => {
+                const newDomain = prompt('Enter domain name:', domain);
+                if (newDomain && newDomain.trim()) {
+                  setDomain(newDomain.trim());
+                }
+              }}
+            >
+              <Typography variant="body2" sx={{ color: '#FFFFFF', fontWeight: 400 }}>
+                {domain}
+              </Typography>
+              <Edit sx={{ color: '#FFFFFF', fontSize: '14px' }} />
+            </Box>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#FFFFFF', fontWeight: 600, mb: 1 }}>
+              Gen-AI Test Case Auditor
+            </Typography>
+            <Typography variant="subtitle1" sx={{ color: '#AAAAAA', fontWeight: 400 }}>
+              AI-Powered Test Case Generation with Enterprise ALM Integration (Jira, Azure DevOps, GitHub, GitLab)
+            </Typography>
+          </Box>
 
-        <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
-          <Tab icon={<Upload />} iconPosition="start" label="Generate Test Cases" />
-          <Tab icon={<Dashboard />} iconPosition="start" label="Analytics" disabled />
-        </Tabs>
+          {/* Navigation Bar */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: 'none' }}>
+            <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ borderBottom: 'none' }}>
+              <Tab 
+                icon={<Upload />} 
+                iconPosition="start" 
+                label="Generate Test Cases"
+                sx={{ 
+                  color: tabValue === 0 ? '#FFFFFF' : '#AAAAAA',
+                  textTransform: 'none',
+                  fontWeight: 400,
+                }}
+              />
+              <Tab 
+                icon={<Dashboard />} 
+                iconPosition="start" 
+                label="Analytics"
+                disabled
+                sx={{ 
+                  color: '#AAAAAA',
+                  textTransform: 'none',
+                  fontWeight: 400,
+                }}
+              />
+            </Tabs>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                color: '#AAAAAA',
+                cursor: 'pointer',
+                '&:hover': {
+                  color: '#FFFFFF',
+                },
+              }}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Typography variant="body1" sx={{ color: 'inherit', fontWeight: 400 }}>
+                ALM Settings
+              </Typography>
+              <Settings sx={{ color: '#FFFFFF' }} />
+            </Box>
+          </Box>
 
         <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="md">
           <DialogTitle>ALM Platform Configuration</DialogTitle>
@@ -286,74 +501,203 @@ function App() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setSettingsOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveSettings} variant="contained" disabled={!isSettingsValid}>Save</Button>
+            <Button 
+              onClick={() => setSettingsOpen(false)}
+              sx={{ color: '#FFFFFF' }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveSettings} 
+              variant="contained" 
+              disabled={!isSettingsValid}
+              sx={{
+                background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                color: '#FFFFFF',
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                },
+                '&:disabled': {
+                  background: '#2C2C2C',
+                  color: '#AAAAAA',
+                },
+              }}
+            >
+              Save
+            </Button>
           </DialogActions>
         </Dialog>
 
         {tabValue === 0 && (
           <>
-            <Card sx={{ mb: 4, p: 3, boxShadow: 1 }}>
+            <Box sx={{ mb: 4 }}>
               <Box component="form" noValidate autoComplete="off">
-                <Typography variant="h6" gutterBottom>1. Specify Domain</Typography>
-                <TextField fullWidth label="Domain" variant="outlined" value={domain} onChange={(e) => setDomain(e.target.value)} sx={{ mb: 3 }} />
-                
-                <Typography variant="h6" gutterBottom>2. Provide Requirement</Typography>
-                <Button variant="contained" component="label" startIcon={<UploadFile />}>
-                  {file ? file.name : 'Select File'}
-                  <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
-                </Button>
-                <Typography color="text.secondary" sx={{ my: 1, textAlign: 'center' }}>OR</Typography>
                 <TextField
                   fullWidth
-                  label="Type or paste requirement here"
+                  placeholder="Type here..."
                   variant="outlined"
                   multiline
-                  rows={4}
+                  rows={8}
                   value={requirementText}
                   onChange={handleTextChange}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: '#2C2C2C',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      '& fieldset': {
+                        borderColor: '#2C2C2C',
+                        borderWidth: '1px',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#2C2C2C',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#2C2C2C',
+                      },
+                      '& textarea::placeholder': {
+                        color: '#AAAAAA',
+                        fontStyle: 'italic',
+                        opacity: 1,
+                      },
+                    },
+                  }}
                 />
 
-                <Box sx={{ mt: 4, position: 'relative', textAlign: 'center' }}>
-                  <Button variant="contained" color="primary" size="large" endIcon={<ArrowForward />} onClick={handleGenerateSubmit} disabled={loading}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, position: 'relative', alignItems: 'center' }}>
+                  {/* File Upload Button */}
+                  <Button
+                    component="label"
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      px: file ? 2 : 1.5,
+                      py: 1.5,
+                      minWidth: file ? 'auto' : '48px',
+                      minHeight: '48px',
+                      '&:hover': {
+                        background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                      },
+                    }}
+                  >
+                    <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
+                    {file ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <UploadFile sx={{ fontSize: '18px' }} />
+                        <Typography variant="body2" sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {file.name}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Add sx={{ color: '#FFFFFF', fontSize: '24px' }} />
+                    )}
+                  </Button>
+                  
+                  {/* Generate Button */}
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={handleGenerateSubmit}
+                    disabled={loading}
+                    startIcon={<Add sx={{ color: '#FFFFFF' }} />}
+                    endIcon={<ArrowUpward sx={{ color: '#FFFFFF' }} />}
+                    sx={{
+                      background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      px: 3,
+                      py: 1.5,
+                      textTransform: 'none',
+                      fontWeight: 400,
+                      fontSize: '1rem',
+                      '&:hover': {
+                        background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                      },
+                      '&:disabled': {
+                        background: '#2C2C2C',
+                        color: '#AAAAAA',
+                      },
+                    }}
+                  >
                     Generate Test Cases
                   </Button>
-                  {loading && <CircularProgress size={24} sx={{ position: 'absolute', top: '50%', left: '50%', marginTop: '-12px', marginLeft: '-12px' }} />}
+                  {loading && <CircularProgress size={24} sx={{ position: 'absolute', top: '50%', right: '20px', color: '#00CED1' }} />}
                 </Box>
               </Box>
-            </Card>
+            </Box>
 
-            {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 4, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{error}</Alert>}
 
             {testData && testData.test_cases && (
               <Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h5" gutterBottom component="div">Generated Test Cases</Typography>
+                  <Typography variant="h5" gutterBottom component="div" sx={{ color: '#FFFFFF' }}>Generated Test Cases</Typography>
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     <FormControl size="small" sx={{ minWidth: 150 }}>
-                      <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
-                        <MenuItem value="Jira">Jira</MenuItem>
-                        <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
-                        <MenuItem value="GitHub">GitHub Issues</MenuItem>
-                        <MenuItem value="GitLab">GitLab Issues</MenuItem>
+                      <Select 
+                        value={selectedPlatform} 
+                        onChange={(e) => setSelectedPlatform(e.target.value)}
+                        sx={{
+                          backgroundColor: '#2C2C2C',
+                          color: '#FFFFFF',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#2C2C2C',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#2C2C2C',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#2C2C2C',
+                          },
+                          '& .MuiSvgIcon-root': {
+                            color: '#FFFFFF',
+                          },
+                        }}
+                      >
+                        <MenuItem value="Jira" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Jira</MenuItem>
+                        <MenuItem value="Azure DevOps" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Azure DevOps</MenuItem>
+                        <MenuItem value="GitHub" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitHub Issues</MenuItem>
+                        <MenuItem value="GitLab" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitLab Issues</MenuItem>
                       </Select>
                     </FormControl>
-                    <Button variant="contained" color="secondary" startIcon={<ConfirmationNumber />} onClick={handleIntegrationSubmit} disabled={integrationLoading}>
+                    <Button 
+                      variant="contained" 
+                      color="secondary" 
+                      startIcon={<ConfirmationNumber />} 
+                      onClick={handleIntegrationSubmit} 
+                      disabled={integrationLoading}
+                      sx={{
+                        background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                        color: '#FFFFFF',
+                        '&:hover': {
+                          background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                        },
+                        '&:disabled': {
+                          background: '#2C2C2C',
+                          color: '#AAAAAA',
+                        },
+                      }}
+                    >
                       Create in {selectedPlatform}
                     </Button>
                   </Box>
                 </Box>
-                {integrationLoading && <CircularProgress sx={{mb: 2}}/>}
-                {integrationError && <Alert severity="error" sx={{ mb: 2 }}>{integrationError}</Alert>}
-                {integrationSuccess && <Alert severity="success" sx={{ mb: 2 }}>{integrationSuccess}</Alert>}
-                <Divider sx={{ mb: 2 }} />
+                {integrationLoading && <CircularProgress sx={{mb: 2, color: '#00CED1'}}/>}
+                {integrationError && <Alert severity="error" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationError}</Alert>}
+                {integrationSuccess && <Alert severity="success" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationSuccess}</Alert>}
+                <Divider sx={{ mb: 2, borderColor: '#2C2C2C' }} />
                 {testData.test_cases.map((test, index) => (
-                  <Card key={index} sx={{ mb: 2, boxShadow: 1 }}>
+                  <Card key={index} sx={{ mb: 2, boxShadow: 1, backgroundColor: '#2C2C2C' }}>
                     <CardHeader 
-                      title={`Test ID: ${test.test_id}`} 
+                      title={`Test ID: ${test.test_id}`}
+                      titleTypographyProps={{ sx: { color: '#FFFFFF' } }}
                       subheader={
                         <>
-                          <div>Source: "{test.requirement_source}"</div>
+                          <Typography component="div" sx={{ color: '#AAAAAA', mt: 1 }}>Source: "{test.requirement_source}"</Typography>
                           {test.compliance_assessment && (
                             <Chip 
                               label={test.compliance_assessment.status} 
@@ -372,28 +716,27 @@ function App() {
                           )}
                         </>
                       }
-                      sx={{ bgcolor: '#eeeeee' }} 
                     />
                     <CardContent>
-                      <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#282c34', color: 'white', p: 2, borderRadius: 1 }}>
+                      <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#1A1A1A', color: '#FFFFFF', p: 2, borderRadius: 1 }}>
                         <code>{test.gherkin_feature}</code>
                       </Typography>
                       {test.compliance_tags && test.compliance_tags.length > 0 && (
                         <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2">Compliance Tags:</Typography>
-                          {test.compliance_tags.map((tag, i) => <Chip key={i} label={tag} sx={{ mr: 1, mt: 1 }} />)}
+                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Compliance Tags:</Typography>
+                          {test.compliance_tags.map((tag, i) => <Chip key={i} label={tag} sx={{ mr: 1, mt: 1, backgroundColor: '#1A1A1A', color: '#FFFFFF' }} />)}
                         </Box>
                       )}
                       {test.compliance_assessment && (
                         <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2">Compliance Assessment:</Typography>
-                          <Typography variant="body2" color="text.secondary">{test.compliance_assessment.reasoning}</Typography>
+                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Compliance Assessment:</Typography>
+                          <Typography variant="body2" sx={{ color: '#AAAAAA' }}>{test.compliance_assessment.reasoning}</Typography>
                         </Box>
                       )}
                       {test.risk_and_priority && (
                         <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2">Risk Assessment:</Typography>
-                          <Typography variant="body2" color="text.secondary">{test.risk_and_priority.reasoning}</Typography>
+                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Risk Assessment:</Typography>
+                          <Typography variant="body2" sx={{ color: '#AAAAAA' }}>{test.risk_and_priority.reasoning}</Typography>
                         </Box>
                       )}
                     </CardContent>
@@ -405,12 +748,13 @@ function App() {
         )}
 
         {tabValue === 1 && (
-          <Card sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>Analytics Dashboard</Typography>
-            <Typography color="text.secondary">Coming soon: Real-time compliance metrics, test coverage, and integration analytics powered by BigQuery.</Typography>
+          <Card sx={{ p: 3, backgroundColor: '#1A1A1A' }}>
+            <Typography variant="h5" gutterBottom sx={{ color: '#FFFFFF' }}>Analytics Dashboard</Typography>
+            <Typography sx={{ color: '#AAAAAA' }}>Coming soon: Real-time compliance metrics, test coverage, and integration analytics powered by BigQuery.</Typography>
           </Card>
         )}
-      </Container>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 }
