@@ -8,28 +8,27 @@ import {
   Button,
   CircularProgress,
   Card,
-  CardContent,
-  CardHeader,
   Chip,
   Alert,
   CssBaseline,
   ThemeProvider,
   createTheme,
   Divider,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tooltip,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   Tabs,
-  Tab
+  Tab,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material';
-import { UploadFile, ArrowForward, ConfirmationNumber, Settings, Upload, Dashboard, Add, ArrowUpward, Edit } from '@mui/icons-material';
+import { UploadFile, ConfirmationNumber, Settings, Upload, Dashboard, Add, ArrowUpward, Edit, ExpandMore } from '@mui/icons-material';
 
 // API Base URL - Uses environment variable with fallback to production URL
 // For local development: Create a .env.local file with REACT_APP_API_BASE_URL=http://localhost:5000
@@ -204,8 +203,72 @@ const theme = createTheme({
         },
       },
     },
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+          '&:before': {
+            display: 'none',
+          },
+          '&.Mui-expanded': {
+            margin: '16px 0',
+          },
+        },
+      },
+    },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#2C2C2C',
+          color: '#FFFFFF',
+          padding: '16px 24px',
+          minHeight: 'auto',
+          '&.Mui-expanded': {
+            minHeight: 'auto',
+          },
+          '& .MuiAccordionSummary-content': {
+            margin: '12px 0',
+            '&.Mui-expanded': {
+              margin: '12px 0',
+            },
+          },
+        },
+        expandIconWrapper: {
+          color: '#FFFFFF',
+        },
+      },
+    },
+    MuiAccordionDetails: {
+      styleOverrides: {
+        root: {
+          padding: '16px 24px 24px 24px',
+          backgroundColor: '#2C2C2C',
+        },
+      },
+    },
   },
 });
+
+// Helper function to extract feature and scenario from Gherkin text
+const extractGherkinInfo = (gherkinText) => {
+  if (!gherkinText) return { feature: '', scenario: '' };
+
+  const lines = gherkinText.split('\n').map(line => line.trim()).filter(line => line);
+  let feature = '';
+  let scenario = '';
+
+  for (const line of lines) {
+    if (line.toLowerCase().startsWith('feature:')) {
+      feature = line.substring(8).trim();
+    } else if (line.toLowerCase().startsWith('scenario:') || line.toLowerCase().startsWith('scenario outline:')) {
+      scenario = line.substring(line.indexOf(':') + 1).trim();
+      break; // Take first scenario
+    }
+  }
+
+  return { feature, scenario };
+};
 
 function App() {
   const [file, setFile] = useState(null);
@@ -409,33 +472,33 @@ function App() {
           {/* Navigation Bar */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: 'none' }}>
             <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ borderBottom: 'none' }}>
-              <Tab 
-                icon={<Upload />} 
-                iconPosition="start" 
+              <Tab
+                icon={<Upload />}
+                iconPosition="start"
                 label="Generate Test Cases"
-                sx={{ 
+                sx={{
                   color: tabValue === 0 ? '#FFFFFF' : '#AAAAAA',
                   textTransform: 'none',
                   fontWeight: 400,
                 }}
               />
-              <Tab 
-                icon={<Dashboard />} 
-                iconPosition="start" 
+              <Tab
+                icon={<Dashboard />}
+                iconPosition="start"
                 label="Analytics"
                 disabled
-                sx={{ 
+                sx={{
                   color: '#AAAAAA',
                   textTransform: 'none',
                   fontWeight: 400,
                 }}
               />
             </Tabs>
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1, 
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
                 color: '#AAAAAA',
                 cursor: 'pointer',
                 '&:hover': {
@@ -451,229 +514,170 @@ function App() {
             </Box>
           </Box>
 
-        <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="md">
-          <DialogTitle>ALM Platform Configuration</DialogTitle>
-          <DialogContent>
-            <Typography variant="body2" sx={{mb: 2}}>
-              Configure credentials for your chosen ALM platform. Settings are saved in your browser's local storage.
-            </Typography>
-            
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Select Platform</InputLabel>
-              <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
-                <MenuItem value="Jira">Jira</MenuItem>
-                <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
-                <MenuItem value="GitHub">GitHub Issues</MenuItem>
-                <MenuItem value="GitLab">GitLab Issues</MenuItem>
-              </Select>
-            </FormControl>
+          <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="md">
+            <DialogTitle>ALM Platform Configuration</DialogTitle>
+            <DialogContent>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Configure credentials for your chosen ALM platform. Settings are saved in your browser's local storage.
+              </Typography>
 
-            {selectedPlatform === 'Jira' && (
-              <>
-                <TextField name="server" label="Jira Server URL" value={jiraSettings.server} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="https://your-domain.atlassian.net" />
-                <TextField name="user" label="Jira User Email" value={jiraSettings.user} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" />
-                <TextField name="apiToken" label="Jira API Token" value={jiraSettings.apiToken} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" type="password" />
-                <TextField name="projectKey" label="Jira Project Key" value={jiraSettings.projectKey} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="PROJ" />
-              </>
-            )}
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Select Platform</InputLabel>
+                <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
+                  <MenuItem value="Jira">Jira</MenuItem>
+                  <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
+                  <MenuItem value="GitHub">GitHub Issues</MenuItem>
+                  <MenuItem value="GitLab">GitLab Issues</MenuItem>
+                </Select>
+              </FormControl>
 
-            {selectedPlatform === 'Azure DevOps' && (
-              <>
-                <TextField name="organization" label="Organization Name" value={azureSettings.organization} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" placeholder="myorg" />
-                <TextField name="pat" label="Personal Access Token" value={azureSettings.pat} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" type="password" />
-                <TextField name="project" label="Project Name" value={azureSettings.project} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" />
-              </>
-            )}
+              {selectedPlatform === 'Jira' && (
+                <>
+                  <TextField name="server" label="Jira Server URL" value={jiraSettings.server} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="https://your-domain.atlassian.net" />
+                  <TextField name="user" label="Jira User Email" value={jiraSettings.user} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" />
+                  <TextField name="apiToken" label="Jira API Token" value={jiraSettings.apiToken} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" type="password" />
+                  <TextField name="projectKey" label="Jira Project Key" value={jiraSettings.projectKey} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="PROJ" />
+                </>
+              )}
 
-            {selectedPlatform === 'GitHub' && (
-              <>
-                <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" type="password" helperText="Create token at: https://github.com/settings/tokens" />
-                <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="your-username" />
-                <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="test-cases" />
-              </>
-            )}
+              {selectedPlatform === 'Azure DevOps' && (
+                <>
+                  <TextField name="organization" label="Organization Name" value={azureSettings.organization} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" placeholder="myorg" />
+                  <TextField name="pat" label="Personal Access Token" value={azureSettings.pat} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" type="password" />
+                  <TextField name="project" label="Project Name" value={azureSettings.project} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" />
+                </>
+              )}
 
-            {selectedPlatform === 'GitLab' && (
-              <>
-                <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
-                <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
-                <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="12345678" helperText="Found in project Settings > General" />
-              </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button 
-              onClick={() => setSettingsOpen(false)}
-              sx={{ color: '#FFFFFF' }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSaveSettings} 
-              variant="contained" 
-              disabled={!isSettingsValid}
-              sx={{
-                background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                color: '#FFFFFF',
-                '&:hover': {
-                  background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
-                },
-                '&:disabled': {
-                  background: '#2C2C2C',
-                  color: '#AAAAAA',
-                },
-              }}
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+              {selectedPlatform === 'GitHub' && (
+                <>
+                  <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" type="password" helperText="Create token at: https://github.com/settings/tokens" />
+                  <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="your-username" />
+                  <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="test-cases" />
+                </>
+              )}
 
-        {tabValue === 0 && (
-          <>
-            <Box sx={{ mb: 4 }}>
-              <Box component="form" noValidate autoComplete="off">
-                <TextField
-                  fullWidth
-                  placeholder="Type here..."
-                  variant="outlined"
-                  multiline
-                  rows={8}
-                  value={requirementText}
-                  onChange={handleTextChange}
-                  sx={{
-                    mb: 2,
-                    '& .MuiOutlinedInput-root': {
-                      backgroundColor: '#2C2C2C',
-                      borderRadius: '8px',
-                      color: '#FFFFFF',
-                      '& fieldset': {
-                        borderColor: '#2C2C2C',
-                        borderWidth: '1px',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: '#2C2C2C',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#2C2C2C',
-                      },
-                      '& textarea::placeholder': {
-                        color: '#AAAAAA',
-                        fontStyle: 'italic',
-                        opacity: 1,
-                      },
-                    },
-                  }}
-                />
+              {selectedPlatform === 'GitLab' && (
+                <>
+                  <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
+                  <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
+                  <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="12345678" helperText="Found in project Settings > General" />
+                </>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setSettingsOpen(false)}
+                sx={{ color: '#FFFFFF' }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveSettings}
+                variant="contained"
+                disabled={!isSettingsValid}
+                sx={{
+                  background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                  color: '#FFFFFF',
+                  '&:hover': {
+                    background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                  },
+                  '&:disabled': {
+                    background: '#2C2C2C',
+                    color: '#AAAAAA',
+                  },
+                }}
+              >
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, position: 'relative', alignItems: 'center' }}>
-                  {/* File Upload Button */}
-                  <Button
-                    component="label"
-                    variant="contained"
-                    size="large"
+          {tabValue === 0 && (
+            <>
+              <Box sx={{ mb: 4 }}>
+                <Box component="form" noValidate autoComplete="off">
+                  <TextField
+                    fullWidth
+                    placeholder="Type here..."
+                    variant="outlined"
+                    multiline
+                    rows={8}
+                    value={requirementText}
+                    onChange={handleTextChange}
                     sx={{
-                      background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                      color: '#FFFFFF',
-                      borderRadius: '8px',
-                      px: file ? 2 : 1.5,
-                      py: 1.5,
-                      minWidth: file ? 'auto' : '48px',
-                      minHeight: '48px',
-                      '&:hover': {
-                        background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                      mb: 2,
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#2C2C2C',
+                        borderRadius: '8px',
+                        color: '#FFFFFF',
+                        '& fieldset': {
+                          borderColor: '#2C2C2C',
+                          borderWidth: '1px',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#2C2C2C',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#2C2C2C',
+                        },
+                        '& textarea::placeholder': {
+                          color: '#AAAAAA',
+                          fontStyle: 'italic',
+                          opacity: 1,
+                        },
                       },
                     }}
-                  >
-                    <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
-                    {file ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <UploadFile sx={{ fontSize: '18px' }} />
-                        <Typography variant="body2" sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {file.name}
-                        </Typography>
-                      </Box>
-                    ) : (
-                      <Add sx={{ color: '#FFFFFF', fontSize: '24px' }} />
-                    )}
-                  </Button>
-                  
-                  {/* Generate Button */}
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={handleGenerateSubmit}
-                    disabled={loading}
-                    startIcon={<Add sx={{ color: '#FFFFFF' }} />}
-                    endIcon={<ArrowUpward sx={{ color: '#FFFFFF' }} />}
-                    sx={{
-                      background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                      color: '#FFFFFF',
-                      borderRadius: '8px',
-                      px: 3,
-                      py: 1.5,
-                      textTransform: 'none',
-                      fontWeight: 400,
-                      fontSize: '1rem',
-                      '&:hover': {
-                        background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
-                      },
-                      '&:disabled': {
-                        background: '#2C2C2C',
-                        color: '#AAAAAA',
-                      },
-                    }}
-                  >
-                    Generate Test Cases
-                  </Button>
-                  {loading && <CircularProgress size={24} sx={{ position: 'absolute', top: '50%', right: '20px', color: '#00CED1' }} />}
-                </Box>
-              </Box>
-            </Box>
+                  />
 
-            {error && <Alert severity="error" sx={{ mb: 4, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{error}</Alert>}
-
-            {testData && testData.test_cases && (
-              <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h5" gutterBottom component="div" sx={{ color: '#FFFFFF' }}>Generated Test Cases</Typography>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <FormControl size="small" sx={{ minWidth: 150 }}>
-                      <Select 
-                        value={selectedPlatform} 
-                        onChange={(e) => setSelectedPlatform(e.target.value)}
-                        sx={{
-                          backgroundColor: '#2C2C2C',
-                          color: '#FFFFFF',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#2C2C2C',
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#2C2C2C',
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#2C2C2C',
-                          },
-                          '& .MuiSvgIcon-root': {
-                            color: '#FFFFFF',
-                          },
-                        }}
-                      >
-                        <MenuItem value="Jira" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Jira</MenuItem>
-                        <MenuItem value="Azure DevOps" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Azure DevOps</MenuItem>
-                        <MenuItem value="GitHub" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitHub Issues</MenuItem>
-                        <MenuItem value="GitLab" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitLab Issues</MenuItem>
-                      </Select>
-                    </FormControl>
-                    <Button 
-                      variant="contained" 
-                      color="secondary" 
-                      startIcon={<ConfirmationNumber />} 
-                      onClick={handleIntegrationSubmit} 
-                      disabled={integrationLoading}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, position: 'relative', alignItems: 'center' }}>
+                    {/* File Upload Button */}
+                    <Button
+                      component="label"
+                      variant="contained"
+                      size="large"
                       sx={{
                         background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
                         color: '#FFFFFF',
+                        borderRadius: '8px',
+                        px: file ? 2 : 1.5,
+                        py: 1.5,
+                        minWidth: file ? 'auto' : '48px',
+                        minHeight: '48px',
+                        '&:hover': {
+                          background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                        },
+                      }}
+                    >
+                      <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
+                      {file ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <UploadFile sx={{ fontSize: '18px' }} />
+                          <Typography variant="body2" sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {file.name}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Add sx={{ color: '#FFFFFF', fontSize: '24px' }} />
+                      )}
+                    </Button>
+
+                    {/* Generate Button */}
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleGenerateSubmit}
+                      disabled={loading}
+                      startIcon={<Add sx={{ color: '#FFFFFF' }} />}
+                      endIcon={<ArrowUpward sx={{ color: '#FFFFFF' }} />}
+                      sx={{
+                        background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                        color: '#FFFFFF',
+                        borderRadius: '8px',
+                        px: 3,
+                        py: 1.5,
+                        textTransform: 'none',
+                        fontWeight: 400,
+                        fontSize: '1rem',
                         '&:hover': {
                           background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
                         },
@@ -683,77 +687,188 @@ function App() {
                         },
                       }}
                     >
-                      Create in {selectedPlatform}
+                      Generate Test Cases
                     </Button>
+                    {loading && <CircularProgress size={24} sx={{ position: 'absolute', top: '50%', right: '20px', color: '#00CED1' }} />}
                   </Box>
                 </Box>
-                {integrationLoading && <CircularProgress sx={{mb: 2, color: '#00CED1'}}/>}
-                {integrationError && <Alert severity="error" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationError}</Alert>}
-                {integrationSuccess && <Alert severity="success" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationSuccess}</Alert>}
-                <Divider sx={{ mb: 2, borderColor: '#2C2C2C' }} />
-                {testData.test_cases.map((test, index) => (
-                  <Card key={index} sx={{ mb: 2, boxShadow: 1, backgroundColor: '#2C2C2C' }}>
-                    <CardHeader 
-                      title={`Test ID: ${test.test_id}`}
-                      titleTypographyProps={{ sx: { color: '#FFFFFF' } }}
-                      subheader={
-                        <>
-                          <Typography component="div" sx={{ color: '#AAAAAA', mt: 1 }}>Source: "{test.requirement_source}"</Typography>
-                          {test.compliance_assessment && (
-                            <Chip 
-                              label={test.compliance_assessment.status} 
-                              color={test.compliance_assessment.status === 'Compliant' ? 'success' : 'error'}
-                              size="small"
-                              sx={{ mt: 0.5 }}
-                            />
-                          )}
-                          {test.risk_and_priority && (
-                            <Chip 
-                              label={`Risk Score: ${test.risk_and_priority.score}/10`}
-                              color={test.risk_and_priority.score >= 7 ? 'error' : test.risk_and_priority.score >= 4 ? 'warning' : 'success'}
-                              size="small"
-                              sx={{ mt: 0.5, ml: 1 }}
-                            />
-                          )}
-                        </>
-                      }
-                    />
-                    <CardContent>
-                      <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#1A1A1A', color: '#FFFFFF', p: 2, borderRadius: 1 }}>
-                        <code>{test.gherkin_feature}</code>
-                      </Typography>
-                      {test.compliance_tags && test.compliance_tags.length > 0 && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Compliance Tags:</Typography>
-                          {test.compliance_tags.map((tag, i) => <Chip key={i} label={tag} sx={{ mr: 1, mt: 1, backgroundColor: '#1A1A1A', color: '#FFFFFF' }} />)}
-                        </Box>
-                      )}
-                      {test.compliance_assessment && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Compliance Assessment:</Typography>
-                          <Typography variant="body2" sx={{ color: '#AAAAAA' }}>{test.compliance_assessment.reasoning}</Typography>
-                        </Box>
-                      )}
-                      {test.risk_and_priority && (
-                        <Box sx={{ mt: 2 }}>
-                          <Typography variant="subtitle2" sx={{ color: '#FFFFFF' }}>Risk Assessment:</Typography>
-                          <Typography variant="body2" sx={{ color: '#AAAAAA' }}>{test.risk_and_priority.reasoning}</Typography>
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
               </Box>
-            )}
-          </>
-        )}
 
-        {tabValue === 1 && (
-          <Card sx={{ p: 3, backgroundColor: '#1A1A1A' }}>
-            <Typography variant="h5" gutterBottom sx={{ color: '#FFFFFF' }}>Analytics Dashboard</Typography>
-            <Typography sx={{ color: '#AAAAAA' }}>Coming soon: Real-time compliance metrics, test coverage, and integration analytics powered by BigQuery.</Typography>
-          </Card>
-        )}
+              {error && <Alert severity="error" sx={{ mb: 4, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{error}</Alert>}
+
+              {testData && testData.test_cases && (
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h5" gutterBottom component="div" sx={{ color: '#FFFFFF' }}>Generated Test Cases</Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <Select
+                          value={selectedPlatform}
+                          onChange={(e) => setSelectedPlatform(e.target.value)}
+                          sx={{
+                            backgroundColor: '#2C2C2C',
+                            color: '#FFFFFF',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#2C2C2C',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#2C2C2C',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#2C2C2C',
+                            },
+                            '& .MuiSvgIcon-root': {
+                              color: '#FFFFFF',
+                            },
+                          }}
+                        >
+                          <MenuItem value="Jira" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Jira</MenuItem>
+                          <MenuItem value="Azure DevOps" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Azure DevOps</MenuItem>
+                          <MenuItem value="GitHub" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitHub Issues</MenuItem>
+                          <MenuItem value="GitLab" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitLab Issues</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<ConfirmationNumber />}
+                        onClick={handleIntegrationSubmit}
+                        disabled={integrationLoading}
+                        sx={{
+                          background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
+                          color: '#FFFFFF',
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                          },
+                          '&:disabled': {
+                            background: '#2C2C2C',
+                            color: '#AAAAAA',
+                          },
+                        }}
+                      >
+                        Create in {selectedPlatform}
+                      </Button>
+                    </Box>
+                  </Box>
+                  {integrationLoading && <CircularProgress sx={{ mb: 2, color: '#00CED1' }} />}
+                  {integrationError && <Alert severity="error" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationError}</Alert>}
+                  {integrationSuccess && <Alert severity="success" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationSuccess}</Alert>}
+                  <Divider sx={{ mb: 2, borderColor: '#2C2C2C' }} />
+                  {testData.test_cases.map((test, index) => {
+                    const { scenario } = extractGherkinInfo(test.gherkin_feature);
+                    return (
+                      <Accordion key={index} sx={{ mb: 1, boxShadow: 1, backgroundColor: '#2C2C2C' }}>
+                        <AccordionSummary
+                          expandIcon={<ExpandMore sx={{ color: '#FFFFFF' }} />}
+                          aria-controls={`test-case-${index}-content`}
+                          id={`test-case-${index}-header`}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', pr: 2 }}>
+                            {/* Ticket number on the left */}
+                            <Chip
+                              label={test.test_id}
+                              size="small"
+                              sx={{
+                                backgroundColor: '#1A1A1A',
+                                color: '#FFFFFF',
+                                fontWeight: 600,
+                                fontSize: '0.75rem'
+                              }}
+                            />
+
+                            {/* Scenario in the middle */}
+                            {scenario && (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+
+                                <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {scenario}
+                                </Typography>
+                              </Box>
+                            )}
+
+                            {/* Compliance and Risk chips aligned to the right */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {test.compliance_assessment && (
+                                <Chip
+                                  label={test.compliance_assessment.status}
+                                  color={test.compliance_assessment.status === 'Compliant' ? 'success' : 'error'}
+                                  size="small"
+                                />
+                              )}
+                              {test.risk_and_priority && (
+                                <Chip
+                                  label={`Risk: ${test.risk_and_priority.score}/10`}
+                                  color={test.risk_and_priority.score >= 7 ? 'error' : test.risk_and_priority.score >= 4 ? 'warning' : 'success'}
+                                  size="small"
+                                />
+                              )}
+                            </Box>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box>
+                            <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
+                              Gherkin Feature:
+                            </Typography>
+                            <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#1A1A1A', color: '#FFFFFF', p: 2, borderRadius: 1, mb: 2 }}>
+                              <code>{test.gherkin_feature}</code>
+                            </Typography>
+
+                            {test.compliance_tags && test.compliance_tags.length > 0 && (
+                              <Box sx={{ mt: 2 }}>
+                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
+                                  Compliance Tags:
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                  {test.compliance_tags.map((tag, i) => (
+                                    <Chip
+                                      key={i}
+                                      label={tag}
+                                      sx={{ backgroundColor: '#1A1A1A', color: '#FFFFFF' }}
+                                      size="small"
+                                    />
+                                  ))}
+                                </Box>
+                              </Box>
+                            )}
+
+                            {test.compliance_assessment && (
+                              <Box sx={{ mt: 2 }}>
+                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
+                                  Compliance Assessment:
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#AAAAAA', lineHeight: 1.6 }}>
+                                  {test.compliance_assessment.reasoning}
+                                </Typography>
+                              </Box>
+                            )}
+
+                            {test.risk_and_priority && (
+                              <Box sx={{ mt: 2 }}>
+                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
+                                  Risk Assessment:
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#AAAAAA', lineHeight: 1.6 }}>
+                                  {test.risk_and_priority.reasoning}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
+                        </AccordionDetails>
+                      </Accordion>
+                    );
+                  })}
+                </Box>
+              )}
+            </>
+          )}
+
+          {tabValue === 1 && (
+            <Card sx={{ p: 3, backgroundColor: '#1A1A1A' }}>
+              <Typography variant="h5" gutterBottom sx={{ color: '#FFFFFF' }}>Analytics Dashboard</Typography>
+              <Typography sx={{ color: '#AAAAAA' }}>Coming soon: Real-time compliance metrics, test coverage, and integration analytics powered by BigQuery.</Typography>
+            </Card>
+          )}
         </Container>
       </Box>
     </ThemeProvider>
