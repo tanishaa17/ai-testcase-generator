@@ -529,8 +529,8 @@ function App() {
           backdropFilter: 'blur(20px)',
           backgroundColor: 'rgba(10, 10, 15, 0.8)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          px: 4,
-          py: 2,
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 1.5, sm: 2 },
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -539,49 +539,77 @@ function App() {
             fontWeight: 600, 
             color: '#FAFAFA',
             letterSpacing: '-0.02em',
-            fontSize: '1.125rem'
+            fontSize: { xs: '1rem', sm: '1.125rem' }
           }}>
             AI Test Generator
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
             <Typography variant="body2" sx={{ 
               color: '#9CA3AF',
               fontSize: '0.875rem',
-              mr: 0.5
+              mr: 0.5,
+              display: { xs: 'none', sm: 'block' }
             }}>
               ALM Settings
             </Typography>
             <IconButton
               onClick={() => setSettingsOpen(true)}
+              size="small"
               sx={{
                 color: '#9CA3AF',
+                padding: { xs: '8px', sm: '12px' },
                 '&:hover': {
                   color: '#FAFAFA',
                   backgroundColor: 'rgba(255, 255, 255, 0.05)'
                 }
               }}
             >
-              <Settings />
+              <Settings sx={{ fontSize: { xs: '20px', sm: '24px' } }} />
             </IconButton>
           </Box>
         </Box>
 
-        <Container maxWidth="md" sx={{ pt: 12, pb: 6 }}>
+        <Container maxWidth="md" sx={{ 
+          pt: { xs: 10, sm: 11, md: 12 }, 
+          pb: { xs: 4, sm: 5, md: 6 },
+          px: { xs: 2, sm: 3, md: 4 }
+        }}>
 
-          <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="sm">
-            <DialogTitle sx={{ pb: 1 }}>
-              <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+          <Dialog 
+            open={settingsOpen} 
+            onClose={() => setSettingsOpen(false)} 
+            fullWidth 
+            maxWidth="sm"
+            PaperProps={{
+              sx: {
+                m: { xs: 1, sm: 2 },
+                maxWidth: { xs: 'calc(100% - 16px)', sm: 'sm' },
+                width: '100%'
+              }
+            }}
+          >
+            <DialogTitle sx={{ pb: 1, px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ 
+                mb: 1, 
+                fontWeight: 600,
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}>
                 ALM Platform Configuration
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: '#9CA3AF',
                 lineHeight: 1.6,
-                fontSize: '0.875rem'
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' }
               }}>
                 Configure credentials for your chosen ALM platform. Settings are saved in your browser's local storage.
               </Typography>
             </DialogTitle>
-            <DialogContent sx={{ px: 3, py: 3, maxHeight: '70vh', overflowY: 'auto' }}>
+            <DialogContent sx={{ 
+              px: { xs: 2, sm: 3 }, 
+              py: { xs: 2, sm: 3 }, 
+              maxHeight: { xs: '60vh', sm: '70vh' }, 
+              overflowY: 'auto' 
+            }}>
 
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" sx={{ 
@@ -1007,16 +1035,24 @@ function App() {
                 )}
               </Box>
             </DialogContent>
-            <DialogActions sx={{ px: 3, py: 2.5, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <DialogActions sx={{ 
+              px: { xs: 2, sm: 3 }, 
+              py: { xs: 2, sm: 2.5 }, 
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              gap: { xs: 1.5, sm: 0 }
+            }}>
               <Button
                 onClick={() => setSettingsOpen(false)}
+                fullWidth={false}
                 sx={{ 
                   color: '#9CA3AF',
                   borderRadius: '12px',
-                  px: 3,
+                  px: { xs: 2, sm: 3 },
                   py: 1,
                   textTransform: 'none',
                   fontWeight: 500,
+                  width: { xs: '100%', sm: 'auto' },
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     color: '#FAFAFA',
@@ -1030,14 +1066,16 @@ function App() {
                 onClick={handleSaveSettings}
                 variant="contained"
                 disabled={!isSettingsValid}
+                fullWidth={false}
                 sx={{
                   background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                   color: '#FAFAFA',
                   borderRadius: '12px',
-                  px: 3,
+                  px: { xs: 2, sm: 3 },
                   py: 1,
                   textTransform: 'none',
                   fontWeight: 500,
+                  width: { xs: '100%', sm: 'auto' },
                   boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
@@ -1069,7 +1107,7 @@ function App() {
               gap: 4
             }}>
               {/* Floating Sphere Animation */}
-              <Box sx={{ position: 'relative', width: 120, height: 120 }}>
+              <Box sx={{ position: 'relative', width: { xs: 100, sm: 120 }, height: { xs: 100, sm: 120 } }}>
                 <Box sx={{
                   position: 'absolute',
                   width: '100%',
@@ -1084,8 +1122,8 @@ function App() {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: 80,
-                  height: 80,
+                  width: { xs: 60, sm: 80 },
+                  height: { xs: 60, sm: 80 },
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6))',
                   border: '2px solid rgba(59, 130, 246, 0.4)',
@@ -1097,7 +1135,7 @@ function App() {
                 color: '#FAFAFA', 
                 fontWeight: 500,
                 letterSpacing: '-0.01em',
-                fontSize: '1.5rem'
+                fontSize: { xs: '1.25rem', sm: '1.5rem' }
               }}>
                 Thinking…
               </Typography>
@@ -1105,8 +1143,10 @@ function App() {
               <Typography variant="body2" sx={{ 
                 color: '#9CA3AF',
                 textAlign: 'center',
-                maxWidth: 400,
-                lineHeight: 1.6
+                maxWidth: { xs: '100%', sm: 400 },
+                px: { xs: 2, sm: 0 },
+                lineHeight: 1.6,
+                fontSize: { xs: '0.875rem', sm: '0.9375rem' }
               }}>
                 Understanding logic, extracting scenarios, validating compliance…
               </Typography>
@@ -1178,17 +1218,20 @@ function App() {
                   </FormControl>
                   <Button
                     variant="contained"
-                    startIcon={integrationLoading ? <CircularProgress size={16} sx={{ color: '#FAFAFA' }} /> : <ConfirmationNumber />}
+                    startIcon={integrationLoading ? <CircularProgress size={16} sx={{ color: '#FAFAFA' }} /> : <ConfirmationNumber sx={{ fontSize: { xs: '16px', sm: '20px' } }} />}
                     onClick={handleIntegrationSubmit}
                     disabled={integrationLoading}
+                    fullWidth={false}
                     sx={{
                       background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                       color: '#FAFAFA',
                       borderRadius: '12px',
-                      px: 3,
+                      px: { xs: 2, sm: 3 },
                       py: 1,
                       textTransform: 'none',
                       fontWeight: 500,
+                      fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                      width: { xs: '100%', sm: 'auto' },
                       boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
                       '&:hover': {
                         background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
@@ -1230,7 +1273,7 @@ function App() {
               </Box>
               
               {/* Test Cases Cards */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                 {testData.test_cases && testData.test_cases.map((test, index) => {
                   const { scenario } = extractGherkinInfo(test?.gherkin_feature || '');
                   return (
@@ -1255,26 +1298,34 @@ function App() {
                       }}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <CardContent sx={{ p: 3 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Box>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'flex-start', 
+                          mb: 2,
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          gap: { xs: 1.5, sm: 0 }
+                        }}>
+                          <Box sx={{ flex: 1 }}>
                             <Typography variant="h6" sx={{ 
                               color: '#FAFAFA', 
                               fontWeight: 600,
-                              mb: 0.5
+                              mb: 0.5,
+                              fontSize: { xs: '1rem', sm: '1.25rem' }
                             }}>
                               {test.test_id}
                             </Typography>
                             {scenario && (
                               <Typography variant="body2" sx={{ 
                                 color: '#9CA3AF',
-                                fontSize: '0.875rem'
+                                fontSize: { xs: '0.8125rem', sm: '0.875rem' }
                               }}>
                                 {scenario}
                               </Typography>
                             )}
                           </Box>
-                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', gap: { xs: 0.75, sm: 1 }, alignItems: 'center', flexWrap: 'wrap' }}>
                             {test.compliance_assessment && (
                               <Chip
                                 label={test.compliance_assessment.status}
@@ -1431,20 +1482,20 @@ function App() {
                 placeholder="Describe a test scenario or requirement… 🚀"
                 variant="outlined"
                 multiline
-                rows={10}
+                rows={{ xs: 8, sm: 10 }}
                 value={requirementText}
                 onChange={handleTextChange}
                 className="ai-glow-border"
                 sx={{
-                  maxWidth: '800px',
+                  maxWidth: { xs: '100%', sm: '800px' },
                   '& .MuiOutlinedInput-root': {
-                    fontSize: '1rem',
+                    fontSize: { xs: '0.9375rem', sm: '1rem' },
                     lineHeight: 1.6,
                     '& textarea': {
-                      padding: '24px',
+                      padding: { xs: '16px', sm: '24px' },
                     },
                     '& textarea::placeholder': {
-                      fontSize: '1rem',
+                      fontSize: { xs: '0.9375rem', sm: '1rem' },
                     },
                   },
                 }}
@@ -1452,19 +1503,20 @@ function App() {
 
               <Box sx={{ 
                 display: 'flex', 
-                gap: 2, 
+                gap: { xs: 1.5, sm: 2 }, 
                 alignItems: 'center',
-                maxWidth: '800px',
+                maxWidth: { xs: '100%', sm: '800px' },
                 width: '100%',
-                justifyContent: 'flex-end'
+                justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                flexDirection: { xs: 'row', sm: 'row' }
               }}>
                 <Tooltip title="Upload Requirement File">
                   <IconButton
                     component="label"
                     sx={{
                       color: '#9CA3AF',
-                      width: 44,
-                      height: 44,
+                      width: { xs: 40, sm: 44 },
+                      height: { xs: 40, sm: 44 },
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '12px',
                       backgroundColor: 'rgba(255, 255, 255, 0.03)',
@@ -1480,9 +1532,9 @@ function App() {
                   >
                     <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
                     {file ? (
-                      <UploadFile sx={{ fontSize: '20px' }} />
+                      <UploadFile sx={{ fontSize: { xs: '18px', sm: '20px' } }} />
                     ) : (
-                      <Add sx={{ fontSize: '20px' }} />
+                      <Add sx={{ fontSize: { xs: '18px', sm: '20px' } }} />
                     )}
                   </IconButton>
                 </Tooltip>
@@ -1491,16 +1543,16 @@ function App() {
                   variant="contained"
                   onClick={handleGenerateSubmit}
                   disabled={loading || (!requirementText.trim() && !file)}
-                  endIcon={<AutoAwesome sx={{ fontSize: '18px' }} />}
+                  endIcon={<AutoAwesome sx={{ fontSize: { xs: '16px', sm: '18px' } }} />}
                   sx={{
                     background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                     color: '#FAFAFA',
                     borderRadius: '12px',
-                    px: 4,
-                    py: 1.25,
+                    px: { xs: 3, sm: 4 },
+                    py: { xs: 1, sm: 1.25 },
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: '0.9375rem',
+                    fontSize: { xs: '0.875rem', sm: '0.9375rem' },
                     boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)',
                     '&:hover': {
                       background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
