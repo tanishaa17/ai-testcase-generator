@@ -535,14 +535,26 @@ function App() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <Typography variant="h6" sx={{ 
-            fontWeight: 600, 
-            color: '#FAFAFA',
-            letterSpacing: '-0.02em',
-            fontSize: { xs: '1rem', sm: '1.125rem' }
-          }}>
-            AI Test Generator
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="AI Test Generator Logo"
+              sx={{
+                height: { xs: 24, sm: 28 },
+                width: 'auto',
+                display: 'block'
+              }}
+            />
+            <Typography variant="h6" sx={{ 
+              fontWeight: 600, 
+              color: '#FAFAFA',
+              letterSpacing: '-0.02em',
+              fontSize: { xs: '1rem', sm: '1.125rem' }
+            }}>
+              AI Test Generator
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
             <Typography variant="body2" sx={{ 
               color: '#9CA3AF',
