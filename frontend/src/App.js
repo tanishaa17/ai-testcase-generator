@@ -8,12 +8,12 @@ import {
   Button,
   CircularProgress,
   Card,
+  CardContent,
   Chip,
   Alert,
   CssBaseline,
   ThemeProvider,
   createTheme,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -22,13 +22,13 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Tabs,
-  Tab,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  IconButton
 } from '@mui/material';
-import { UploadFile, ConfirmationNumber, Settings, Upload, Dashboard, Add, ArrowUpward, Edit, ExpandMore } from '@mui/icons-material';
+import { UploadFile, ConfirmationNumber, Settings, Add, ExpandMore, AutoAwesome, ArrowBack } from '@mui/icons-material';
+import './App.css';
 
 // API Base URL - Uses environment variable with fallback to production URL
 // For local development: Create a .env.local file with REACT_APP_API_BASE_URL=http://localhost:5000
@@ -39,37 +39,48 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#32CD32',
+      main: '#3B82F6', // Neon blue
+      light: '#60A5FA',
+      dark: '#2563EB',
     },
     secondary: {
-      main: '#1a9c6b',
+      main: '#9333EA', // Purple
+      light: '#A855F7',
+      dark: '#7E22CE',
     },
     background: {
-      default: '#1A1A1A',
-      paper: '#1A1A1A',
+      default: '#0A0A0F',
+      paper: 'rgba(15, 15, 23, 0.6)',
     },
     text: {
-      primary: '#FFFFFF',
-      secondary: '#AAAAAA',
+      primary: '#FAFAFA',
+      secondary: '#9CA3AF',
     },
   },
   typography: {
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "SF Pro Display", system-ui, sans-serif',
     h4: {
       fontWeight: 600,
-      color: '#FFFFFF',
+      letterSpacing: '-0.02em',
+    },
+    h5: {
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
     },
     body1: {
-      color: '#FFFFFF',
+      fontWeight: 400,
+      fontSize: '0.9375rem',
     },
     body2: {
-      color: '#AAAAAA',
+      fontWeight: 400,
+      fontSize: '0.875rem',
     },
   },
   components: {
     MuiContainer: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1A1A1A',
+          backgroundColor: 'transparent',
         },
       },
     },
@@ -77,25 +88,31 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            backgroundColor: '#2C2C2C',
-            color: '#FFFFFF',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#FAFAFA',
+            transition: 'all 0.3s ease',
             '& fieldset': {
-              borderColor: '#2C2C2C',
+              border: 'none',
             },
-            '&:hover fieldset': {
-              borderColor: '#2C2C2C',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderColor: 'rgba(59, 130, 246, 0.3)',
             },
-            '&.Mui-focused fieldset': {
-              borderColor: '#2C2C2C',
+            '&.Mui-focused': {
+              backgroundColor: 'rgba(255, 255, 255, 0.06)',
+              borderColor: 'rgba(59, 130, 246, 0.6)',
+              boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.1)',
             },
           },
           '& .MuiInputLabel-root': {
-            color: '#AAAAAA',
+            color: '#9CA3AF',
           },
           '& .MuiInputBase-input::placeholder': {
-            color: '#AAAAAA',
+            color: '#6B7280',
             opacity: 1,
-            fontStyle: 'italic',
           },
         },
       },
@@ -103,7 +120,8 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1A1A1A',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          backdropFilter: 'blur(10px)',
         },
       },
     },
@@ -131,34 +149,50 @@ const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
+          backgroundColor: 'rgba(15, 15, 23, 0.95)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '20px',
+          color: '#FAFAFA',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
         },
       },
     },
     MuiAlert: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '12px',
+          color: '#FAFAFA',
         },
       },
     },
     MuiSelect: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          color: '#FAFAFA',
+          borderRadius: '12px',
         },
       },
     },
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          color: '#FAFAFA',
+          borderRadius: '8px',
+          margin: '4px 8px',
           '&:hover': {
-            backgroundColor: '#3C3C3C',
+            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            '&:hover': {
+              backgroundColor: 'rgba(59, 130, 246, 0.25)',
+            },
           },
         },
       },
@@ -166,14 +200,17 @@ const theme = createTheme({
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          color: '#FFFFFF',
+          color: '#FAFAFA',
+          fontWeight: 600,
+          fontSize: '1.25rem',
+          letterSpacing: '-0.01em',
         },
       },
     },
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          color: '#FFFFFF',
+          color: '#FAFAFA',
         },
       },
     },
@@ -181,7 +218,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiInputLabel-root': {
-            color: '#AAAAAA',
+            color: '#9CA3AF',
           },
         },
       },
@@ -189,9 +226,9 @@ const theme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: '#AAAAAA',
+          color: '#9CA3AF',
           '&.Mui-focused': {
-            color: '#AAAAAA',
+            color: '#9CA3AF',
           },
         },
       },
@@ -199,20 +236,19 @@ const theme = createTheme({
     MuiDialogActions: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
+          backgroundColor: 'transparent',
+          padding: '20px 24px',
         },
       },
     },
     MuiAccordion: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
+          backgroundColor: 'transparent',
+          color: '#FAFAFA',
+          boxShadow: 'none',
           '&:before': {
             display: 'none',
-          },
-          '&.Mui-expanded': {
-            margin: '16px 0',
           },
         },
       },
@@ -220,30 +256,33 @@ const theme = createTheme({
     MuiAccordionSummary: {
       styleOverrides: {
         root: {
-          backgroundColor: '#2C2C2C',
-          color: '#FFFFFF',
-          padding: '16px 24px',
+          backgroundColor: 'transparent',
+          color: '#FAFAFA',
+          padding: 0,
           minHeight: 'auto',
           '&.Mui-expanded': {
             minHeight: 'auto',
           },
           '& .MuiAccordionSummary-content': {
-            margin: '12px 0',
+            margin: 0,
             '&.Mui-expanded': {
-              margin: '12px 0',
+              margin: 0,
             },
           },
         },
         expandIconWrapper: {
-          color: '#FFFFFF',
+          color: '#9CA3AF',
         },
       },
     },
     MuiAccordionDetails: {
       styleOverrides: {
         root: {
-          padding: '16px 24px 24px 24px',
-          backgroundColor: '#2C2C2C',
+          padding: 0,
+          backgroundColor: 'transparent !important',
+          '&.Mui-expanded': {
+            backgroundColor: 'transparent !important',
+          },
         },
       },
     },
@@ -273,7 +312,7 @@ const extractGherkinInfo = (gherkinText) => {
 function App() {
   const [file, setFile] = useState(null);
   const [requirementText, setRequirementText] = useState('');
-  const [domain, setDomain] = useState('Healthcare');
+  const [domain] = useState('Healthcare'); // Fixed domain value
   const [testData, setTestData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -289,7 +328,7 @@ function App() {
   const [gitlabSettings, setGitlabSettings] = useState({ url: 'https://gitlab.com', token: '', projectId: '' });
 
   const [isSettingsValid, setIsSettingsValid] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [expandedAccordion, setExpandedAccordion] = useState(null);
 
   useEffect(() => {
     const savedJiraSettings = localStorage.getItem('jiraSettings');
@@ -431,88 +470,51 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: '#1A1A1A', py: 4 }}>
-        <Container maxWidth="lg">
-          {/* Header Section */}
-          <Box sx={{ textAlign: 'center', mb: 5 }}>
-            {/* Domain Tag - Editable */}
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                borderRadius: '4px',
-                px: 2,
-                py: 0.5,
-                mb: 2,
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-              onClick={() => {
-                const newDomain = prompt('Enter domain name:', domain);
-                if (newDomain && newDomain.trim()) {
-                  setDomain(newDomain.trim());
-                }
-              }}
-            >
-              <Typography variant="body2" sx={{ color: '#FFFFFF', fontWeight: 400 }}>
-                {domain}
-              </Typography>
-              <Edit sx={{ color: '#FFFFFF', fontSize: '14px' }} />
-            </Box>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#FFFFFF', fontWeight: 600, mb: 1 }}>
-              Gen-AI Test Case Auditor
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: '#AAAAAA', fontWeight: 400 }}>
-              AI-Powered Test Case Generation with Enterprise ALM Integration (Jira, Azure DevOps, GitHub, GitLab)
-            </Typography>
-          </Box>
+      <Box sx={{ 
+        minHeight: '100vh', 
+        backgroundColor: '#0A0A0F',
+        backgroundImage: 'radial-gradient(at 20% 30%, rgba(59, 130, 246, 0.1) 0px, transparent 50%), radial-gradient(at 80% 70%, rgba(147, 51, 234, 0.1) 0px, transparent 50%)',
+        position: 'relative'
+      }}>
+        {/* Top Header */}
+        <Box sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          backdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(10, 10, 15, 0.8)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          px: 4,
+          py: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Typography variant="h6" sx={{ 
+            fontWeight: 600, 
+            color: '#FAFAFA',
+            letterSpacing: '-0.02em',
+            fontSize: '1.125rem'
+          }}>
+            AI Test Auditor
+          </Typography>
+          <IconButton
+            onClick={() => setSettingsOpen(true)}
+            sx={{
+              color: '#9CA3AF',
+              '&:hover': {
+                color: '#FAFAFA',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)'
+              }
+            }}
+          >
+            <Settings />
+          </IconButton>
+        </Box>
 
-          {/* Navigation Bar */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, borderBottom: 'none' }}>
-            <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ borderBottom: 'none' }}>
-              <Tab
-                icon={<Upload />}
-                iconPosition="start"
-                label="Generate Test Cases"
-                sx={{
-                  color: tabValue === 0 ? '#FFFFFF' : '#AAAAAA',
-                  textTransform: 'none',
-                  fontWeight: 400,
-                }}
-              />
-              <Tab
-                icon={<Dashboard />}
-                iconPosition="start"
-                label="Analytics"
-                disabled
-                sx={{
-                  color: '#AAAAAA',
-                  textTransform: 'none',
-                  fontWeight: 400,
-                }}
-              />
-            </Tabs>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                color: '#AAAAAA',
-                cursor: 'pointer',
-                '&:hover': {
-                  color: '#FFFFFF',
-                },
-              }}
-              onClick={() => setSettingsOpen(true)}
-            >
-              <Typography variant="body1" sx={{ color: 'inherit', fontWeight: 400 }}>
-                ALM Settings
-              </Typography>
-              <Settings sx={{ color: '#FFFFFF' }} />
-            </Box>
-          </Box>
+        <Container maxWidth="md" sx={{ pt: 12, pb: 6 }}>
 
           <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="md">
             <DialogTitle>ALM Platform Configuration</DialogTitle>
@@ -521,7 +523,7 @@ function App() {
                 Configure credentials for your chosen ALM platform. Settings are saved in your browser's local storage.
               </Typography>
 
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth margin="dense" size="small">
                 <InputLabel>Select Platform</InputLabel>
                 <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
                   <MenuItem value="Jira">Jira</MenuItem>
@@ -533,41 +535,47 @@ function App() {
 
               {selectedPlatform === 'Jira' && (
                 <>
-                  <TextField name="server" label="Jira Server URL" value={jiraSettings.server} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="https://your-domain.atlassian.net" />
-                  <TextField name="user" label="Jira User Email" value={jiraSettings.user} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" />
-                  <TextField name="apiToken" label="Jira API Token" value={jiraSettings.apiToken} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" type="password" />
-                  <TextField name="projectKey" label="Jira Project Key" value={jiraSettings.projectKey} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="normal" placeholder="PROJ" />
+                  <TextField name="server" label="Jira Server URL" value={jiraSettings.server} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" placeholder="https://your-domain.atlassian.net" />
+                  <TextField name="user" label="Jira User Email" value={jiraSettings.user} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" />
+                  <TextField name="apiToken" label="Jira API Token" value={jiraSettings.apiToken} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" type="password" />
+                  <TextField name="projectKey" label="Jira Project Key" value={jiraSettings.projectKey} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" placeholder="PROJ" />
                 </>
               )}
 
               {selectedPlatform === 'Azure DevOps' && (
                 <>
-                  <TextField name="organization" label="Organization Name" value={azureSettings.organization} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" placeholder="myorg" />
-                  <TextField name="pat" label="Personal Access Token" value={azureSettings.pat} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" type="password" />
-                  <TextField name="project" label="Project Name" value={azureSettings.project} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="normal" />
+                  <TextField name="organization" label="Organization Name" value={azureSettings.organization} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" placeholder="myorg" />
+                  <TextField name="pat" label="Personal Access Token" value={azureSettings.pat} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" type="password" />
+                  <TextField name="project" label="Project Name" value={azureSettings.project} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" />
                 </>
               )}
 
               {selectedPlatform === 'GitHub' && (
                 <>
-                  <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" type="password" helperText="Create token at: https://github.com/settings/tokens" />
-                  <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="your-username" />
-                  <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="normal" placeholder="test-cases" />
+                  <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" type="password" helperText="Create token at: https://github.com/settings/tokens" />
+                  <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" placeholder="your-username" />
+                  <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" placeholder="test-cases" />
                 </>
               )}
 
               {selectedPlatform === 'GitLab' && (
                 <>
-                  <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
-                  <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
-                  <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="normal" placeholder="12345678" helperText="Found in project Settings > General" />
+                  <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
+                  <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
+                  <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" placeholder="12345678" helperText="Found in project Settings > General" />
                 </>
               )}
             </DialogContent>
             <DialogActions>
               <Button
                 onClick={() => setSettingsOpen(false)}
-                sx={{ color: '#FFFFFF' }}
+                sx={{ 
+                  color: '#9CA3AF',
+                  borderRadius: '12px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  }
+                }}
               >
                 Cancel
               </Button>
@@ -576,15 +584,22 @@ function App() {
                 variant="contained"
                 disabled={!isSettingsValid}
                 sx={{
-                  background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                  color: '#FFFFFF',
+                  background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
+                  color: '#FAFAFA',
+                  borderRadius: '12px',
+                  px: 3,
+                  boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
                   '&:hover': {
-                    background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
+                    background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
+                    boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
+                    transform: 'translateY(-1px)',
                   },
                   '&:disabled': {
-                    background: '#2C2C2C',
-                    color: '#AAAAAA',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: '#6B7280',
+                    boxShadow: 'none',
                   },
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Save
@@ -592,282 +607,482 @@ function App() {
             </DialogActions>
           </Dialog>
 
-          {tabValue === 0 && (
-            <>
-              <Box sx={{ mb: 4 }}>
-                <Box component="form" noValidate autoComplete="off">
-                  <TextField
-                    fullWidth
-                    placeholder="Type here..."
-                    variant="outlined"
-                    multiline
-                    rows={8}
-                    value={requirementText}
-                    onChange={handleTextChange}
-                    sx={{
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        backgroundColor: '#2C2C2C',
-                        borderRadius: '8px',
-                        color: '#FFFFFF',
-                        '& fieldset': {
-                          borderColor: '#2C2C2C',
-                          borderWidth: '1px',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#2C2C2C',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#2C2C2C',
-                        },
-                        '& textarea::placeholder': {
-                          color: '#AAAAAA',
-                          fontStyle: 'italic',
-                          opacity: 1,
-                        },
-                      },
-                    }}
-                  />
-
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, position: 'relative', alignItems: 'center' }}>
-                    {/* File Upload Button */}
-                    <Button
-                      component="label"
-                      variant="contained"
-                      size="large"
-                      sx={{
-                        background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        px: file ? 2 : 1.5,
-                        py: 1.5,
-                        minWidth: file ? 'auto' : '48px',
-                        minHeight: '48px',
-                        '&:hover': {
-                          background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
-                        },
-                      }}
-                    >
-                      <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
-                      {file ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <UploadFile sx={{ fontSize: '18px' }} />
-                          <Typography variant="body2" sx={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {file.name}
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Add sx={{ color: '#FFFFFF', fontSize: '24px' }} />
-                      )}
-                    </Button>
-
-                    {/* Generate Button */}
-                    <Button
-                      variant="contained"
-                      size="large"
-                      onClick={handleGenerateSubmit}
-                      disabled={loading}
-                      startIcon={<Add sx={{ color: '#FFFFFF' }} />}
-                      endIcon={<ArrowUpward sx={{ color: '#FFFFFF' }} />}
-                      sx={{
-                        background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        px: 3,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 400,
-                        fontSize: '1rem',
-                        '&:hover': {
-                          background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
-                        },
-                        '&:disabled': {
-                          background: '#2C2C2C',
-                          color: '#AAAAAA',
-                        },
-                      }}
-                    >
-                      Generate Test Cases
-                    </Button>
-                    {loading && <CircularProgress size={24} sx={{ position: 'absolute', top: '50%', right: '20px', color: '#00CED1' }} />}
-                  </Box>
-                </Box>
+          {/* Main Content - Conditional Rendering */}
+          {loading ? (
+            // AI Thinking / Loader Screen
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              minHeight: '60vh',
+              gap: 4
+            }}>
+              {/* Floating Sphere Animation */}
+              <Box sx={{ position: 'relative', width: 120, height: 120 }}>
+                <Box sx={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(147, 51, 234, 0.2) 100%)',
+                  animation: 'float 3s ease-in-out infinite',
+                  filter: 'blur(20px)'
+                }} />
+                <Box sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6))',
+                  border: '2px solid rgba(59, 130, 246, 0.4)',
+                  animation: 'pulse-glow 2s ease-in-out infinite'
+                }} />
               </Box>
-
-              {error && <Alert severity="error" sx={{ mb: 4, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{error}</Alert>}
-
-              {testData && testData.test_cases && (
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h5" gutterBottom component="div" sx={{ color: '#FFFFFF' }}>Generated Test Cases</Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <FormControl size="small" sx={{ minWidth: 150 }}>
-                        <Select
-                          value={selectedPlatform}
-                          onChange={(e) => setSelectedPlatform(e.target.value)}
-                          sx={{
-                            backgroundColor: '#2C2C2C',
-                            color: '#FFFFFF',
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#2C2C2C',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#2C2C2C',
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#2C2C2C',
-                            },
-                            '& .MuiSvgIcon-root': {
-                              color: '#FFFFFF',
-                            },
-                          }}
-                        >
-                          <MenuItem value="Jira" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Jira</MenuItem>
-                          <MenuItem value="Azure DevOps" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>Azure DevOps</MenuItem>
-                          <MenuItem value="GitHub" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitHub Issues</MenuItem>
-                          <MenuItem value="GitLab" sx={{ backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>GitLab Issues</MenuItem>
-                        </Select>
-                      </FormControl>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<ConfirmationNumber />}
-                        onClick={handleIntegrationSubmit}
-                        disabled={integrationLoading}
-                        sx={{
-                          background: 'linear-gradient(90deg, #00CED1 0%, #8A2BE2 100%)',
-                          color: '#FFFFFF',
-                          '&:hover': {
-                            background: 'linear-gradient(90deg, #00B8BB 0%, #7A1AD2 100%)',
-                          },
-                          '&:disabled': {
-                            background: '#2C2C2C',
-                            color: '#AAAAAA',
-                          },
-                        }}
-                      >
-                        Create in {selectedPlatform}
-                      </Button>
-                    </Box>
-                  </Box>
-                  {integrationLoading && <CircularProgress sx={{ mb: 2, color: '#00CED1' }} />}
-                  {integrationError && <Alert severity="error" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationError}</Alert>}
-                  {integrationSuccess && <Alert severity="success" sx={{ mb: 2, backgroundColor: '#2C2C2C', color: '#FFFFFF' }}>{integrationSuccess}</Alert>}
-                  <Divider sx={{ mb: 2, borderColor: '#2C2C2C' }} />
-                  {testData.test_cases.map((test, index) => {
-                    const { scenario } = extractGherkinInfo(test.gherkin_feature);
-                    return (
-                      <Accordion key={index} sx={{ mb: 1, boxShadow: 1, backgroundColor: '#2C2C2C' }}>
-                        <AccordionSummary
-                          expandIcon={<ExpandMore sx={{ color: '#FFFFFF' }} />}
-                          aria-controls={`test-case-${index}-content`}
-                          id={`test-case-${index}-header`}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', pr: 2 }}>
-                            {/* Ticket number on the left */}
-                            <Chip
-                              label={test.test_id}
+              
+              <Typography variant="h5" sx={{ 
+                color: '#FAFAFA', 
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
+                fontSize: '1.5rem'
+              }}>
+                Thinking…
+              </Typography>
+              
+              <Typography variant="body2" sx={{ 
+                color: '#9CA3AF',
+                textAlign: 'center',
+                maxWidth: 400,
+                lineHeight: 1.6
+              }}>
+                Understanding logic, extracting scenarios, validating compliance…
+              </Typography>
+            </Box>
+          ) : testData && testData.test_cases ? (
+            // Results View
+            <Box className="fade-in">
+              <Box sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                  <IconButton
+                    onClick={() => {
+                      setTestData(null);
+                      setRequirementText('');
+                      setFile(null);
+                      setError('');
+                      setIntegrationSuccess('');
+                      setIntegrationError('');
+                    }}
+                    sx={{
+                      color: '#9CA3AF',
+                      '&:hover': {
+                        color: '#FAFAFA',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                      }
+                    }}
+                  >
+                    <ArrowBack />
+                  </IconButton>
+                  <Typography variant="h5" sx={{ 
+                    color: '#FAFAFA',
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em'
+                  }}>
+                    Generated Test Cases
+                  </Typography>
+                </Box>
+                
+                {/* Export Actions */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2, 
+                  mb: 4,
+                  flexWrap: 'wrap'
+                }}>
+                  <FormControl size="small" sx={{ minWidth: 180 }}>
+                    <Select
+                      value={selectedPlatform}
+                      onChange={(e) => setSelectedPlatform(e.target.value)}
+                      sx={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        color: '#FAFAFA',
+                        borderRadius: '12px',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(59, 130, 246, 0.3)',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgba(59, 130, 246, 0.5)',
+                        },
+                      }}
+                    >
+                      <MenuItem value="Jira">Jira</MenuItem>
+                      <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
+                      <MenuItem value="GitHub">GitHub Issues</MenuItem>
+                      <MenuItem value="GitLab">GitLab Issues</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Button
+                    variant="contained"
+                    startIcon={integrationLoading ? <CircularProgress size={16} sx={{ color: '#FAFAFA' }} /> : <ConfirmationNumber />}
+                    onClick={handleIntegrationSubmit}
+                    disabled={integrationLoading}
+                    sx={{
+                      background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
+                      color: '#FAFAFA',
+                      borderRadius: '12px',
+                      px: 3,
+                      py: 1,
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
+                        boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
+                        transform: 'translateY(-1px)',
+                      },
+                      '&:disabled': {
+                        background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
+                        opacity: 0.7
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {integrationLoading ? 'Exporting...' : `Create in ${selectedPlatform}`}
+                  </Button>
+                </Box>
+                {integrationError && (
+                  <Alert severity="error" sx={{ 
+                    mb: 3, 
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#FAFAFA',
+                    borderRadius: '12px'
+                  }}>
+                    {integrationError}
+                  </Alert>
+                )}
+                {integrationSuccess && (
+                  <Alert severity="success" sx={{ 
+                    mb: 3,
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                    color: '#FAFAFA',
+                    borderRadius: '12px'
+                  }}>
+                    {integrationSuccess}
+                  </Alert>
+                )}
+              </Box>
+              
+              {/* Test Cases Cards */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {testData.test_cases && testData.test_cases.map((test, index) => {
+                  const { scenario } = extractGherkinInfo(test?.gherkin_feature || '');
+                  return (
+                    <Card 
+                      key={index} 
+                      className="fade-in"
+                      onClick={() => setExpandedAccordion(expandedAccordion === index ? null : index)}
+                      sx={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          borderColor: 'rgba(59, 130, 246, 0.3)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                        }
+                      }}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box>
+                            <Typography variant="h6" sx={{ 
+                              color: '#FAFAFA', 
+                              fontWeight: 600,
+                              mb: 0.5
+                            }}>
+                              {test.test_id}
+                            </Typography>
+                            {scenario && (
+                              <Typography variant="body2" sx={{ 
+                                color: '#9CA3AF',
+                                fontSize: '0.875rem'
+                              }}>
+                                {scenario}
+                              </Typography>
+                            )}
+                          </Box>
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                            {test.compliance_assessment && (
+                              <Chip
+                                label={test.compliance_assessment.status}
+                                color={test.compliance_assessment.status === 'Compliant' ? 'success' : 'error'}
+                                size="small"
+                                sx={{
+                                  borderRadius: '8px',
+                                  fontWeight: 500
+                                }}
+                              />
+                            )}
+                            {test.risk_and_priority && (
+                              <Chip
+                                label={`Risk: ${test.risk_and_priority.score}/10`}
+                                color={test.risk_and_priority.score >= 7 ? 'error' : test.risk_and_priority.score >= 4 ? 'warning' : 'success'}
+                                size="small"
+                                sx={{
+                                  borderRadius: '8px',
+                                  fontWeight: 500
+                                }}
+                              />
+                            )}
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedAccordion(expandedAccordion === index ? null : index);
+                              }}
                               size="small"
                               sx={{
-                                backgroundColor: '#1A1A1A',
-                                color: '#FFFFFF',
-                                fontWeight: 600,
-                                fontSize: '0.75rem'
+                                color: '#9CA3AF',
+                                padding: '4px',
+                                '&:hover': {
+                                  color: '#FAFAFA',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                transform: expandedAccordion === index ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.3s ease'
                               }}
-                            />
-
-                            {/* Scenario in the middle */}
-                            {scenario && (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-
-                                <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {scenario}
-                                </Typography>
-                              </Box>
-                            )}
-
-                            {/* Compliance and Risk chips aligned to the right */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {test.compliance_assessment && (
-                                <Chip
-                                  label={test.compliance_assessment.status}
-                                  color={test.compliance_assessment.status === 'Compliant' ? 'success' : 'error'}
-                                  size="small"
-                                />
-                              )}
-                              {test.risk_and_priority && (
-                                <Chip
-                                  label={`Risk: ${test.risk_and_priority.score}/10`}
-                                  color={test.risk_and_priority.score >= 7 ? 'error' : test.risk_and_priority.score >= 4 ? 'warning' : 'success'}
-                                  size="small"
-                                />
-                              )}
-                            </Box>
+                            >
+                              <ExpandMore />
+                            </IconButton>
                           </Box>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <Box>
-                            <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
-                              Gherkin Feature:
+                        </Box>
+                        
+                        <Accordion 
+                          expanded={expandedAccordion === index}
+                          sx={{ 
+                            backgroundColor: 'transparent',
+                            boxShadow: 'none',
+                            '&:before': { display: 'none' },
+                            '&.Mui-expanded': {
+                              backgroundColor: 'transparent',
+                              margin: 0
+                            }
+                          }}
+                        >
+                          <AccordionSummary
+                            sx={{ 
+                              display: 'none'
+                            }}
+                          >
+                          </AccordionSummary>
+                          <AccordionDetails sx={{ 
+                            p: 2, 
+                            backgroundColor: 'transparent !important',
+                            '&.Mui-expanded': {
+                              backgroundColor: 'transparent !important',
+                            }
+                          }}>
+                            <Typography variant="subtitle2" sx={{ color: '#FAFAFA', mb: 1, fontWeight: 600 }}>
+                              Gherkin Feature
                             </Typography>
-                            <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap', bgcolor: '#1A1A1A', color: '#FFFFFF', p: 2, borderRadius: 1, mb: 2 }}>
-                              <code>{test.gherkin_feature}</code>
-                            </Typography>
-
+                            <Box sx={{
+                              p: 2,
+                              borderRadius: '12px',
+                              mb: 2
+                            }}>
+                              <Typography variant="body2" component="pre" sx={{ 
+                                whiteSpace: 'pre-wrap', 
+                                color: '#FAFAFA',
+                                fontFamily: 'Monaco, Consolas, monospace',
+                                fontSize: '0.8125rem',
+                                lineHeight: 1.6,
+                                margin: 0
+                              }}>
+                                {test.gherkin_feature}
+                              </Typography>
+                            </Box>
+                            
                             {test.compliance_tags && test.compliance_tags.length > 0 && (
-                              <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
-                                  Compliance Tags:
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ color: '#FAFAFA', mb: 1, fontWeight: 600 }}>
+                                  Compliance Tags
                                 </Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                  {test.compliance_tags.map((tag, i) => (
-                                    <Chip
-                                      key={i}
-                                      label={tag}
-                                      sx={{ backgroundColor: '#1A1A1A', color: '#FFFFFF' }}
+                                  {test.compliance_tags && test.compliance_tags.map((tag, i) => (
+                                    <Chip 
+                                      key={i} 
+                                      label={tag} 
                                       size="small"
+                                      sx={{ 
+                                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                                        color: '#60A5FA',
+                                        border: '1px solid rgba(59, 130, 246, 0.2)',
+                                        borderRadius: '8px'
+                                      }}
                                     />
                                   ))}
                                 </Box>
                               </Box>
                             )}
-
+                            
                             {test.compliance_assessment && (
-                              <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
-                                  Compliance Assessment:
+                              <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ color: '#FAFAFA', mb: 1, fontWeight: 600 }}>
+                                  Compliance Assessment
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#AAAAAA', lineHeight: 1.6 }}>
+                                <Typography variant="body2" sx={{ color: '#9CA3AF', lineHeight: 1.7 }}>
                                   {test.compliance_assessment.reasoning}
                                 </Typography>
                               </Box>
                             )}
-
+                            
                             {test.risk_and_priority && (
-                              <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle2" sx={{ color: '#FFFFFF', mb: 1, fontWeight: 600 }}>
-                                  Risk Assessment:
+                              <Box>
+                                <Typography variant="subtitle2" sx={{ color: '#FAFAFA', mb: 1, fontWeight: 600 }}>
+                                  Risk Assessment
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: '#AAAAAA', lineHeight: 1.6 }}>
+                                <Typography variant="body2" sx={{ color: '#9CA3AF', lineHeight: 1.7 }}>
                                   {test.risk_and_priority.reasoning}
                                 </Typography>
                               </Box>
                             )}
-                          </Box>
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })}
-                </Box>
-              )}
-            </>
-          )}
+                          </AccordionDetails>
+                        </Accordion>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Box>
+            </Box>
+          ) : (
+            // Hero Input View
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '60vh',
+              gap: 3
+            }}>
+              <TextField
+                fullWidth
+                placeholder="Describe a test scenario or requirement… 🚀"
+                variant="outlined"
+                multiline
+                rows={10}
+                value={requirementText}
+                onChange={handleTextChange}
+                className="ai-glow-border"
+                sx={{
+                  maxWidth: '800px',
+                  '& .MuiOutlinedInput-root': {
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
+                    '& textarea': {
+                      padding: '24px',
+                    },
+                    '& textarea::placeholder': {
+                      fontSize: '1rem',
+                    },
+                  },
+                }}
+              />
 
-          {tabValue === 1 && (
-            <Card sx={{ p: 3, backgroundColor: '#1A1A1A' }}>
-              <Typography variant="h5" gutterBottom sx={{ color: '#FFFFFF' }}>Analytics Dashboard</Typography>
-              <Typography sx={{ color: '#AAAAAA' }}>Coming soon: Real-time compliance metrics, test coverage, and integration analytics powered by BigQuery.</Typography>
-            </Card>
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 2, 
+                alignItems: 'center',
+                maxWidth: '800px',
+                width: '100%',
+                justifyContent: 'flex-end'
+              }}>
+                <IconButton
+                  component="label"
+                  sx={{
+                    color: '#9CA3AF',
+                    width: 44,
+                    height: 44,
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      color: '#FAFAFA',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      borderColor: 'rgba(59, 130, 246, 0.3)',
+                      transform: 'translateY(-1px)',
+                    },
+                  }}
+                >
+                  <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
+                  {file ? (
+                    <UploadFile sx={{ fontSize: '20px' }} />
+                  ) : (
+                    <Add sx={{ fontSize: '20px' }} />
+                  )}
+                </IconButton>
+
+                <Button
+                  variant="contained"
+                  onClick={handleGenerateSubmit}
+                  disabled={loading || (!requirementText.trim() && !file)}
+                  endIcon={<AutoAwesome sx={{ fontSize: '18px' }} />}
+                  sx={{
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
+                    color: '#FAFAFA',
+                    borderRadius: '12px',
+                    px: 4,
+                    py: 1.25,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: '0.9375rem',
+                    boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
+                      boxShadow: '0 6px 20px rgba(59, 130, 246, 0.35)',
+                      transform: 'translateY(-1px)',
+                    },
+                    '&:disabled': {
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: '#6B7280',
+                      boxShadow: 'none',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  Generate
+                </Button>
+              </Box>
+
+              {error && (
+                <Alert 
+                  severity="error" 
+                  sx={{ 
+                    maxWidth: '800px',
+                    width: '100%',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#FAFAFA',
+                    borderRadius: '12px'
+                  }}
+                >
+                  {error}
+                </Alert>
+              )}
+            </Box>
           )}
         </Container>
       </Box>
