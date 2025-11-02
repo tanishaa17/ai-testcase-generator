@@ -1482,17 +1482,21 @@ function App() {
                 placeholder="Describe a test scenario or requirement… 🚀"
                 variant="outlined"
                 multiline
-                rows={{ xs: 8, sm: 10 }}
+                minRows={{ xs: 10, sm: 12 }}
+                maxRows={{ xs: 20, sm: 24 }}
                 value={requirementText}
                 onChange={handleTextChange}
-                className="ai-glow-border"
+                className="ai-glow-border textarea-scrollbar"
                 sx={{
                   maxWidth: { xs: '100%', sm: '800px' },
                   '& .MuiOutlinedInput-root': {
                     fontSize: { xs: '0.9375rem', sm: '1rem' },
                     lineHeight: 1.6,
+                    overflow: 'visible',
                     '& textarea': {
                       padding: { xs: '16px', sm: '24px' },
+                      overflowY: 'auto',
+                      resize: 'none',
                     },
                     '& textarea::placeholder': {
                       fontSize: { xs: '0.9375rem', sm: '1rem' },
