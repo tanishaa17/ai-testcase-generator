@@ -1,70 +1,130 @@
-# Getting Started with Create React App
+# AI Test Case Generator - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React application that leverages AI to automatically generate comprehensive, compliance-validated test cases from software requirements. Features seamless integration with enterprise ALM platforms including Jira, Azure DevOps, GitHub Issues, and GitLab Issues.
 
-## Available Scripts
+**Live Application**: [https://ai-testcase-generator-umber.vercel.app/](https://ai-testcase-generator-umber.vercel.app/)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [https://ai-testcase-generator-umber.vercel.app/](https://ai-testcase-generator-umber.vercel.app/) to view it in your browser.
+- **AI-Powered Generation**: Automatically creates test cases from text or uploaded files (PDF, DOCX, XML, TXT)
+- **Compliance Validation**: FDA, HIPAA, GDPR, ISO 13485, IEC 62304 compliance assessment with risk scoring
+- **ALM Integration**: Direct export to Jira, Azure DevOps, GitHub Issues, and GitLab Issues
+- **Modern UI**: Futuristic, minimalistic design with glass-morphism effects and smooth animations
+- **Fully Responsive**: Optimized for mobile, tablet, and desktop devices
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **React 19.1.1** with hooks and functional components
+- **Material-UI (MUI) v7.3.2** with custom theme
+- **Emotion** for CSS-in-JS styling
+- **Axios** for API communication
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 📦 Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Prerequisites
+- Node.js 16.x or higher
+- npm or yarn
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Setup
 
-### `npm run eject`
+1. **Install dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+2. **Configure environment** (Optional for local development)
+   
+   Create `.env.local` in the `frontend` directory:
+   ```bash
+   REACT_APP_API_BASE_URL=http://localhost:5000
+   ```
+   
+   **Note**: If not set, defaults to production backend URL.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. **Start development server**
+   ```bash
+   npm start
+   ```
+   
+   Opens at `http://localhost:3000`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🌐 Environment Configuration
 
-## Learn More
+The application uses `REACT_APP_API_BASE_URL` environment variable:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Default**: `https://ai-testcase-generator-583h.onrender.com` (production)
+- **Local Development**: Set `REACT_APP_API_BASE_URL=http://localhost:5000` in `.env.local`
+- **Production**: Set in your deployment platform's environment variables
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 📜 Available Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `npm start` - Runs development server on `http://localhost:3000`
+- `npm test` - Launches test runner
+- `npm run build` - Creates production build in `build/` folder
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🎯 Usage
 
-### Making a Progressive Web App
+### Generate Test Cases
+1. Enter requirement text in the textarea or upload a file (PDF, DOCX, XML, TXT)
+2. Click **"Generate"** button
+3. Review generated test cases with compliance status and risk scores
+4. Click anywhere on a test case card to view detailed information
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### ALM Integration
+1. Click **"ALM Settings"** (⚙️) in the header
+2. Select platform and enter credentials
+3. Click **"Save Configuration"** (settings saved in browser)
+4. After generating test cases, select platform and click **"Create in [Platform]"**
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🚀 Deployment
 
-### Deployment
+### Build
+```bash
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Environment Variable
+Set `REACT_APP_API_BASE_URL` in your deployment platform's settings.
 
-### `npm run build` fails to minify
+### Supported Platforms
+Any static hosting platform (Vercel, Netlify, AWS S3, GitHub Pages, etc.)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## 🐛 Troubleshooting
+
+**API Connection Errors**
+- Verify backend is running (if local) or check `.env.local` file
+- Check browser console for CORS errors
+
+**Build Failures**
+- Delete `node_modules` and `package-lock.json`, then run `npm install` again
+
+**Port Already in Use**
+- Kill process on port 3000 or set `PORT=3001` environment variable
+
+---
+
+## 📚 Resources
+
+- [React Documentation](https://react.dev/)
+- [Material-UI Documentation](https://mui.com/)
+
+---
+
+**Framework**: React 19.1.1 with Material-UI 7.3.2
