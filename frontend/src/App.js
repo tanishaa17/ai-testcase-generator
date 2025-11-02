@@ -21,11 +21,11 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  IconButton
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { UploadFile, ConfirmationNumber, Settings, Add, ExpandMore, AutoAwesome, ArrowBack } from '@mui/icons-material';
 import './App.css';
@@ -197,6 +197,31 @@ const theme = createTheme({
         },
       },
     },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: 'rgba(15, 15, 23, 0.98)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          marginTop: '8px',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          '&.MuiMenu-paper': {
+            backgroundColor: 'rgba(15, 15, 23, 0.98) !important',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          },
+        },
+      },
+    },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
@@ -211,6 +236,24 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           color: '#FAFAFA',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(59, 130, 246, 0.3)',
+            borderRadius: '10px',
+            border: '2px solid transparent',
+            backgroundClip: 'content-box',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              background: 'rgba(59, 130, 246, 0.5)',
+              backgroundClip: 'content-box',
+            },
+          },
         },
       },
     },
@@ -486,8 +529,8 @@ function App() {
           backdropFilter: 'blur(20px)',
           backgroundColor: 'rgba(10, 10, 15, 0.8)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          px: 4,
-          py: 2,
+          px: { xs: 2, sm: 3, md: 4 },
+          py: { xs: 1.5, sm: 2 },
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
@@ -496,85 +539,525 @@ function App() {
             fontWeight: 600, 
             color: '#FAFAFA',
             letterSpacing: '-0.02em',
-            fontSize: '1.125rem'
+            fontSize: { xs: '1rem', sm: '1.125rem' }
           }}>
-            AI Test Auditor
+            AI Test Generator
           </Typography>
-          <IconButton
-            onClick={() => setSettingsOpen(true)}
-            sx={{
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+            <Typography variant="body2" sx={{ 
               color: '#9CA3AF',
-              '&:hover': {
-                color: '#FAFAFA',
-                backgroundColor: 'rgba(255, 255, 255, 0.05)'
+              fontSize: '0.875rem',
+              mr: 0.5,
+              display: { xs: 'none', sm: 'block' }
+            }}>
+              ALM Settings
+            </Typography>
+            <IconButton
+              onClick={() => setSettingsOpen(true)}
+              size="small"
+              sx={{
+                color: '#9CA3AF',
+                padding: { xs: '8px', sm: '12px' },
+                '&:hover': {
+                  color: '#FAFAFA',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                }
+              }}
+            >
+              <Settings sx={{ fontSize: { xs: '20px', sm: '24px' } }} />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Container maxWidth="md" sx={{ 
+          pt: { xs: 10, sm: 11, md: 12 }, 
+          pb: { xs: 4, sm: 5, md: 6 },
+          px: { xs: 2, sm: 3, md: 4 }
+        }}>
+
+          <Dialog 
+            open={settingsOpen} 
+            onClose={() => setSettingsOpen(false)} 
+            fullWidth 
+            maxWidth="sm"
+            PaperProps={{
+              sx: {
+                m: { xs: 1, sm: 2 },
+                maxWidth: { xs: 'calc(100% - 16px)', sm: 'sm' },
+                width: '100%'
               }
             }}
           >
-            <Settings />
-          </IconButton>
-        </Box>
-
-        <Container maxWidth="md" sx={{ pt: 12, pb: 6 }}>
-
-          <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)} fullWidth maxWidth="md">
-            <DialogTitle>ALM Platform Configuration</DialogTitle>
-            <DialogContent>
-              <Typography variant="body2" sx={{ mb: 2 }}>
+            <DialogTitle sx={{ pb: 1, px: { xs: 2, sm: 3 }, pt: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ 
+                mb: 1, 
+                fontWeight: 600,
+                fontSize: { xs: '1.1rem', sm: '1.25rem' }
+              }}>
+                ALM Platform Configuration
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                color: '#9CA3AF',
+                lineHeight: 1.6,
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' }
+              }}>
                 Configure credentials for your chosen ALM platform. Settings are saved in your browser's local storage.
               </Typography>
+            </DialogTitle>
+            <DialogContent sx={{ 
+              px: { xs: 2, sm: 3 }, 
+              py: { xs: 2, sm: 3 }, 
+              maxHeight: { xs: '60vh', sm: '70vh' }, 
+              overflowY: 'auto' 
+            }}>
 
-              <FormControl fullWidth margin="dense" size="small">
-                <InputLabel>Select Platform</InputLabel>
-                <Select value={selectedPlatform} onChange={(e) => setSelectedPlatform(e.target.value)}>
-                  <MenuItem value="Jira">Jira</MenuItem>
-                  <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
-                  <MenuItem value="GitHub">GitHub Issues</MenuItem>
-                  <MenuItem value="GitLab">GitLab Issues</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" sx={{ 
+                  color: '#9CA3AF',
+                  mb: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                }}>
+                  Select Platform
+                </Typography>
+                <FormControl fullWidth>
+                  <Select 
+                    value={selectedPlatform} 
+                    onChange={(e) => setSelectedPlatform(e.target.value)}
+                    displayEmpty
+                    sx={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      borderRadius: '12px',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(59, 130, 246, 0.3)',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                      },
+                      '& .MuiSelect-select': {
+                        color: '#FAFAFA',
+                        padding: '14px',
+                      }
+                    }}
+                  >
+                    <MenuItem value="Jira">Jira</MenuItem>
+                    <MenuItem value="Azure DevOps">Azure DevOps</MenuItem>
+                    <MenuItem value="GitHub">GitHub Issues</MenuItem>
+                    <MenuItem value="GitLab">GitLab Issues</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-              {selectedPlatform === 'Jira' && (
-                <>
-                  <TextField name="server" label="Jira Server URL" value={jiraSettings.server} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" placeholder="https://your-domain.atlassian.net" />
-                  <TextField name="user" label="Jira User Email" value={jiraSettings.user} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" />
-                  <TextField name="apiToken" label="Jira API Token" value={jiraSettings.apiToken} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" type="password" />
-                  <TextField name="projectKey" label="Jira Project Key" value={jiraSettings.projectKey} onChange={(e) => handleSettingsChange(e, 'jira')} fullWidth margin="dense" size="small" placeholder="PROJ" />
-                </>
-              )}
+              <Box sx={{ 
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)', 
+                pt: 3 
+              }}>
+                {/* <Typography variant="caption" sx={{ 
+                  color: '#9CA3AF', 
+                  mb: 2, 
+                  display: 'block',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  Connection Details
+                </Typography> */}
 
-              {selectedPlatform === 'Azure DevOps' && (
-                <>
-                  <TextField name="organization" label="Organization Name" value={azureSettings.organization} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" placeholder="myorg" />
-                  <TextField name="pat" label="Personal Access Token" value={azureSettings.pat} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" type="password" />
-                  <TextField name="project" label="Project Name" value={azureSettings.project} onChange={(e) => handleSettingsChange(e, 'azure')} fullWidth margin="dense" size="small" />
-                </>
-              )}
+                {selectedPlatform === 'Jira' && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField 
+                      name="server" 
+                      label="Jira Server URL" 
+                      value={jiraSettings.server} 
+                      onChange={(e) => handleSettingsChange(e, 'jira')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="https://your-domain.atlassian.net"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="user" 
+                      label="Jira User Email" 
+                      value={jiraSettings.user} 
+                      onChange={(e) => handleSettingsChange(e, 'jira')} 
+                      fullWidth
+                      variant="outlined"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="apiToken" 
+                      label="Jira API Token" 
+                      value={jiraSettings.apiToken} 
+                      onChange={(e) => handleSettingsChange(e, 'jira')} 
+                      fullWidth 
+                      variant="outlined"
+                      type="password"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="projectKey" 
+                      label="Jira Project Key" 
+                      value={jiraSettings.projectKey} 
+                      onChange={(e) => handleSettingsChange(e, 'jira')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="PROJ"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                  </Box>
+                )}
 
-              {selectedPlatform === 'GitHub' && (
-                <>
-                  <TextField name="token" label="GitHub Personal Access Token" value={githubSettings.token} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" type="password" helperText="Create token at: https://github.com/settings/tokens" />
-                  <TextField name="owner" label="Repository Owner (username)" value={githubSettings.owner} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" placeholder="your-username" />
-                  <TextField name="repo" label="Repository Name" value={githubSettings.repo} onChange={(e) => handleSettingsChange(e, 'github')} fullWidth margin="dense" size="small" placeholder="test-cases" />
-                </>
-              )}
+                {selectedPlatform === 'Azure DevOps' && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField 
+                      name="organization" 
+                      label="Organization Name" 
+                      value={azureSettings.organization} 
+                      onChange={(e) => handleSettingsChange(e, 'azure')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="myorg"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="pat" 
+                      label="Personal Access Token" 
+                      value={azureSettings.pat} 
+                      onChange={(e) => handleSettingsChange(e, 'azure')} 
+                      fullWidth 
+                      variant="outlined"
+                      type="password"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="project" 
+                      label="Project Name" 
+                      value={azureSettings.project} 
+                      onChange={(e) => handleSettingsChange(e, 'azure')} 
+                      fullWidth
+                      variant="outlined"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                  </Box>
+                )}
 
-              {selectedPlatform === 'GitLab' && (
-                <>
-                  <TextField name="url" label="GitLab URL" value={gitlabSettings.url} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" placeholder="https://gitlab.com" helperText="Use https://gitlab.com for public GitLab" />
-                  <TextField name="token" label="GitLab Personal Access Token" value={gitlabSettings.token} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" type="password" helperText="Create token at: GitLab Settings > Access Tokens" />
-                  <TextField name="projectId" label="Project ID (Numeric)" value={gitlabSettings.projectId} onChange={(e) => handleSettingsChange(e, 'gitlab')} fullWidth margin="dense" size="small" placeholder="12345678" helperText="Found in project Settings > General" />
-                </>
-              )}
+                {selectedPlatform === 'GitHub' && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField 
+                      name="token" 
+                      label="GitHub Personal Access Token" 
+                      value={githubSettings.token} 
+                      onChange={(e) => handleSettingsChange(e, 'github')} 
+                      fullWidth 
+                      variant="outlined"
+                      type="password" 
+                      helperText="Create token at: https://github.com/settings/tokens"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#6B7280',
+                          fontSize: '0.75rem',
+                          mt: 0.5
+                        }
+                      }}
+                    />
+                    <TextField 
+                      name="owner" 
+                      label="Repository Owner (username)" 
+                      value={githubSettings.owner} 
+                      onChange={(e) => handleSettingsChange(e, 'github')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="your-username"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                    <TextField 
+                      name="repo" 
+                      label="Repository Name" 
+                      value={githubSettings.repo} 
+                      onChange={(e) => handleSettingsChange(e, 'github')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="test-cases"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {selectedPlatform === 'GitLab' && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField 
+                      name="url" 
+                      label="GitLab URL" 
+                      value={gitlabSettings.url} 
+                      onChange={(e) => handleSettingsChange(e, 'gitlab')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="https://gitlab.com" 
+                      helperText="Use https://gitlab.com for public GitLab"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#6B7280',
+                          fontSize: '0.75rem',
+                          mt: 0.5
+                        }
+                      }}
+                    />
+                    <TextField 
+                      name="token" 
+                      label="GitLab Personal Access Token" 
+                      value={gitlabSettings.token} 
+                      onChange={(e) => handleSettingsChange(e, 'gitlab')} 
+                      fullWidth 
+                      variant="outlined"
+                      type="password" 
+                      helperText="Create token at: GitLab Settings > Access Tokens"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#6B7280',
+                          fontSize: '0.75rem',
+                          mt: 0.5
+                        }
+                      }}
+                    />
+                    <TextField 
+                      name="projectId" 
+                      label="Project ID (Numeric)" 
+                      value={gitlabSettings.projectId} 
+                      onChange={(e) => handleSettingsChange(e, 'gitlab')} 
+                      fullWidth 
+                      variant="outlined"
+                      placeholder="12345678" 
+                      helperText="Found in project Settings > General"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      sx={{
+                        '& .MuiInputLabel-root': {
+                          color: '#9CA3AF',
+                          position: 'static',
+                          transform: 'none',
+                          marginBottom: '8px',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        },
+                        '& .MuiOutlinedInput-root': {
+                          marginTop: 0,
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#6B7280',
+                          fontSize: '0.75rem',
+                          mt: 0.5
+                        }
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ 
+              px: { xs: 2, sm: 3 }, 
+              py: { xs: 2, sm: 2.5 }, 
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              gap: { xs: 1.5, sm: 0 }
+            }}>
               <Button
                 onClick={() => setSettingsOpen(false)}
+                fullWidth={false}
                 sx={{ 
                   color: '#9CA3AF',
                   borderRadius: '12px',
+                  px: { xs: 2, sm: 3 },
+                  py: 1,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  width: { xs: '100%', sm: 'auto' },
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  }
+                    color: '#FAFAFA',
+                  },
+                  transition: 'all 0.2s ease',
                 }}
               >
                 Cancel
@@ -583,11 +1066,16 @@ function App() {
                 onClick={handleSaveSettings}
                 variant="contained"
                 disabled={!isSettingsValid}
+                fullWidth={false}
                 sx={{
                   background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                   color: '#FAFAFA',
                   borderRadius: '12px',
-                  px: 3,
+                  px: { xs: 2, sm: 3 },
+                  py: 1,
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  width: { xs: '100%', sm: 'auto' },
                   boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
                   '&:hover': {
                     background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
@@ -602,7 +1090,7 @@ function App() {
                   transition: 'all 0.2s ease',
                 }}
               >
-                Save
+                Save Configuration
               </Button>
             </DialogActions>
           </Dialog>
@@ -619,7 +1107,7 @@ function App() {
               gap: 4
             }}>
               {/* Floating Sphere Animation */}
-              <Box sx={{ position: 'relative', width: 120, height: 120 }}>
+              <Box sx={{ position: 'relative', width: { xs: 100, sm: 120 }, height: { xs: 100, sm: 120 } }}>
                 <Box sx={{
                   position: 'absolute',
                   width: '100%',
@@ -634,8 +1122,8 @@ function App() {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width: 80,
-                  height: 80,
+                  width: { xs: 60, sm: 80 },
+                  height: { xs: 60, sm: 80 },
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6))',
                   border: '2px solid rgba(59, 130, 246, 0.4)',
@@ -647,7 +1135,7 @@ function App() {
                 color: '#FAFAFA', 
                 fontWeight: 500,
                 letterSpacing: '-0.01em',
-                fontSize: '1.5rem'
+                fontSize: { xs: '1.25rem', sm: '1.5rem' }
               }}>
                 Thinking…
               </Typography>
@@ -655,8 +1143,10 @@ function App() {
               <Typography variant="body2" sx={{ 
                 color: '#9CA3AF',
                 textAlign: 'center',
-                maxWidth: 400,
-                lineHeight: 1.6
+                maxWidth: { xs: '100%', sm: 400 },
+                px: { xs: 2, sm: 0 },
+                lineHeight: 1.6,
+                fontSize: { xs: '0.875rem', sm: '0.9375rem' }
               }}>
                 Understanding logic, extracting scenarios, validating compliance…
               </Typography>
@@ -728,17 +1218,20 @@ function App() {
                   </FormControl>
                   <Button
                     variant="contained"
-                    startIcon={integrationLoading ? <CircularProgress size={16} sx={{ color: '#FAFAFA' }} /> : <ConfirmationNumber />}
+                    startIcon={integrationLoading ? <CircularProgress size={16} sx={{ color: '#FAFAFA' }} /> : <ConfirmationNumber sx={{ fontSize: { xs: '16px', sm: '20px' } }} />}
                     onClick={handleIntegrationSubmit}
                     disabled={integrationLoading}
+                    fullWidth={false}
                     sx={{
                       background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                       color: '#FAFAFA',
                       borderRadius: '12px',
-                      px: 3,
+                      px: { xs: 2, sm: 3 },
                       py: 1,
                       textTransform: 'none',
                       fontWeight: 500,
+                      fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                      width: { xs: '100%', sm: 'auto' },
                       boxShadow: '0 4px 14px rgba(59, 130, 246, 0.2)',
                       '&:hover': {
                         background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
@@ -780,7 +1273,7 @@ function App() {
               </Box>
               
               {/* Test Cases Cards */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                 {testData.test_cases && testData.test_cases.map((test, index) => {
                   const { scenario } = extractGherkinInfo(test?.gherkin_feature || '');
                   return (
@@ -805,26 +1298,34 @@ function App() {
                       }}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <CardContent sx={{ p: 3 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                          <Box>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'flex-start', 
+                          mb: 2,
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          gap: { xs: 1.5, sm: 0 }
+                        }}>
+                          <Box sx={{ flex: 1 }}>
                             <Typography variant="h6" sx={{ 
                               color: '#FAFAFA', 
                               fontWeight: 600,
-                              mb: 0.5
+                              mb: 0.5,
+                              fontSize: { xs: '1rem', sm: '1.25rem' }
                             }}>
                               {test.test_id}
                             </Typography>
                             {scenario && (
                               <Typography variant="body2" sx={{ 
                                 color: '#9CA3AF',
-                                fontSize: '0.875rem'
+                                fontSize: { xs: '0.8125rem', sm: '0.875rem' }
                               }}>
                                 {scenario}
                               </Typography>
                             )}
                           </Box>
-                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <Box sx={{ display: 'flex', gap: { xs: 0.75, sm: 1 }, alignItems: 'center', flexWrap: 'wrap' }}>
                             {test.compliance_assessment && (
                               <Chip
                                 label={test.compliance_assessment.status}
@@ -981,20 +1482,20 @@ function App() {
                 placeholder="Describe a test scenario or requirement… 🚀"
                 variant="outlined"
                 multiline
-                rows={10}
+                rows={{ xs: 8, sm: 10 }}
                 value={requirementText}
                 onChange={handleTextChange}
                 className="ai-glow-border"
                 sx={{
-                  maxWidth: '800px',
+                  maxWidth: { xs: '100%', sm: '800px' },
                   '& .MuiOutlinedInput-root': {
-                    fontSize: '1rem',
+                    fontSize: { xs: '0.9375rem', sm: '1rem' },
                     lineHeight: 1.6,
                     '& textarea': {
-                      padding: '24px',
+                      padding: { xs: '16px', sm: '24px' },
                     },
                     '& textarea::placeholder': {
-                      fontSize: '1rem',
+                      fontSize: { xs: '0.9375rem', sm: '1rem' },
                     },
                   },
                 }}
@@ -1002,53 +1503,56 @@ function App() {
 
               <Box sx={{ 
                 display: 'flex', 
-                gap: 2, 
+                gap: { xs: 1.5, sm: 2 }, 
                 alignItems: 'center',
-                maxWidth: '800px',
+                maxWidth: { xs: '100%', sm: '800px' },
                 width: '100%',
-                justifyContent: 'flex-end'
+                justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                flexDirection: { xs: 'row', sm: 'row' }
               }}>
-                <IconButton
-                  component="label"
-                  sx={{
-                    color: '#9CA3AF',
-                    width: 44,
-                    height: 44,
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      color: '#FAFAFA',
-                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                      borderColor: 'rgba(59, 130, 246, 0.3)',
-                      transform: 'translateY(-1px)',
-                    },
-                  }}
-                >
-                  <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
-                  {file ? (
-                    <UploadFile sx={{ fontSize: '20px' }} />
-                  ) : (
-                    <Add sx={{ fontSize: '20px' }} />
-                  )}
-                </IconButton>
+                <Tooltip title="Upload Requirement File">
+                  <IconButton
+                    component="label"
+                    sx={{
+                      color: '#9CA3AF',
+                      width: { xs: 40, sm: 44 },
+                      height: { xs: 40, sm: 44 },
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        color: '#FAFAFA',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        borderColor: 'rgba(59, 130, 246, 0.3)',
+                        transform: 'translateY(-1px)',
+                      },
+                    }}
+                  >
+                    <input type="file" hidden onChange={handleFileChange} accept=".pdf,.docx,.xml,.txt" />
+                    {file ? (
+                      <UploadFile sx={{ fontSize: { xs: '18px', sm: '20px' } }} />
+                    ) : (
+                      <Add sx={{ fontSize: { xs: '18px', sm: '20px' } }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
 
                 <Button
                   variant="contained"
                   onClick={handleGenerateSubmit}
                   disabled={loading || (!requirementText.trim() && !file)}
-                  endIcon={<AutoAwesome sx={{ fontSize: '18px' }} />}
+                  endIcon={<AutoAwesome sx={{ fontSize: { xs: '16px', sm: '18px' } }} />}
                   sx={{
                     background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)',
                     color: '#FAFAFA',
                     borderRadius: '12px',
-                    px: 4,
-                    py: 1.25,
+                    px: { xs: 3, sm: 4 },
+                    py: { xs: 1, sm: 1.25 },
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: '0.9375rem',
+                    fontSize: { xs: '0.875rem', sm: '0.9375rem' },
                     boxShadow: '0 4px 14px rgba(59, 130, 246, 0.25)',
                     '&:hover': {
                       background: 'linear-gradient(135deg, #2563EB 0%, #7E22CE 100%)',
